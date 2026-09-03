@@ -1,0 +1,24 @@
+{
+  "_note": "Banned terms, checked in CI over every copy file. A match fails the build. app.ops_review_template applies the same list server-side. See docs/11-i18n.md §1.",
+  "about_the_food": {
+    "en": ["leftover", "leftovers", "expired", "old food", "waste", "wasted", "scraps", "unsold scraps", "past its best", "day-old"],
+    "ar-KW": ["بواقي", "مخلفات", "منتهي", "بايت", "زايد", "فضلات", "نفايات"],
+    "ar-EG": ["بواقي", "مخلفات", "منتهي", "بايت", "زايد", "فضلات", "نفايات"]
+  },
+  "manufactured_urgency": {
+    "en": ["hurry", "don't miss out", "dont miss out", "last chance", "act now", "only for the fastest", "limited time only", "before it's too late"],
+    "ar-KW": ["اسرع", "أسرع", "لا تفوت الفرصة", "الفرصة الأخيرة", "قبل فوات الوقت", "للأسرع فقط"],
+    "ar-EG": ["اسرع", "بسرعة", "متفوتش الفرصة", "آخر فرصة", "قبل ما تفوت", "للأسرع بس"]
+  },
+  "charity_or_guilt": {
+    "en": ["needy", "poor", "charity", "donation to you", "help the planet", "save the planet", "feel guilty", "shame"],
+    "ar-KW": ["محتاجين", "الفقراء", "صدقة", "تبرع لك", "أنقذ الكوكب"],
+    "ar-EG": ["محتاجين", "الفقرا", "صدقة", "تبرع ليك", "أنقذ الكوكب"]
+  },
+  "allowed_register": {
+    "_note": "For reference, not enforced. This is the vocabulary to reach for.",
+    "en": ["surplus", "rescued", "saved", "available", "still good", "worth up to"],
+    "ar-KW": ["فائض", "أُنقذ", "متاح", "قيمتها حتى"],
+    "ar-EG": ["فايض", "اتنقذ", "متاح", "قيمتها لحد"]
+  }
+}

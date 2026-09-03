@@ -15,5 +15,8 @@
     "db:lint": "supabase db lint",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1"
   }
 }

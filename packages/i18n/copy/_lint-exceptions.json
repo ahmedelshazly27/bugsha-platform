@@ -1,0 +1,49 @@
+{
+  "_note": "Reviewed exceptions to the copy lint. docs/11-i18n.md §1 bans a word list 'about the food'; a few strings use one of those words about something else entirely (a licence, a payment reference). Each exception names the key, the term and why it is correct. The test asserts every exception is still needed, so a stale one fails the build rather than quietly widening the gate. Nothing here may be about the food.",
+  "forbidden_terms": [
+    {
+      "file": "errors.json",
+      "key": "BG117.body",
+      "term": "expired",
+      "locales": [
+        "en"
+      ],
+      "reason": "Partner-facing. The FOOD PERMIT expired, not the food — and the same string reassures the partner that bags already sold are unaffected. Saying 'lapsed' here would be vaguer about a regulatory fact."
+    },
+    {
+      "file": "common.json",
+      "key": "safety.headline",
+      "term": "expired",
+      "locales": [
+        "en"
+      ],
+      "reason": "The approved safety assurance from the design system: 'Surplus. Not expired.' The word appears only as a NEGATION, and this is the single most important trust line in the consumer app (00-product.md: Kuwait's adoption risk is 'old food' anxiety). Removing it would remove the reassurance."
+    },
+    {
+      "file": "notifications.json",
+      "key": "partner.document_expired.title",
+      "term": "expired",
+      "locales": [
+        "en"
+      ],
+      "reason": "Partner-facing licence notice. The DOCUMENT expired, not the food. check_document_expiry drives this push, and naming the regulatory fact plainly is what makes it actionable."
+    },
+    {
+      "file": "common.json",
+      "key": "safety.headline",
+      "term": "منتهي",
+      "locales": [
+        "ar-KW",
+        "ar-EG"
+      ],
+      "reason": "Same approved trust line in both Arabic registers — 'فائض. وليس منتهي الصلاحية.' and 'فايض. مش منتهي الصلاحية.' The banned word appears only inside the negation that carries the reassurance."
+    }
+  ],
+  "identical_arabic_registers": [
+    {
+      "file": "common.json",
+      "key": "browse.reserve.action",
+      "reason": "The verb phrase 'احجز بـ {amount}' is correct in both registers; the design system's approved table shows the two rows differing only in the interpolated amount (1.750 KWD vs 89.50 EGP). Reviewed, not copied."
+    }
+  ]
+}

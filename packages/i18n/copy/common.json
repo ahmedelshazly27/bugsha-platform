@@ -1,0 +1,34 @@
+{
+  "_note": "The 24 core interface strings (docs/11-i18n.md §10), ported verbatim from the design system's approved register at guidelines/consumer-copy.card.html. The two Arabic locales were authored separately for their markets — never machine-translate between them.",
+
+  "browse.header.title":        { "en": "Tonight near you", "ar-KW": "الليلة قريب منك", "ar-EG": "النهاردة جنبك" },
+  "browse.empty.title":         { "en": "Tonight's bags are gone", "ar-KW": "بقش الليلة خلصت", "ar-EG": "بقش النهاردة خلصت" },
+  "bag.sold_out":               { "en": "Sold out", "ar-KW": "نفدت", "ar-EG": "اتحجزت كلها" },
+  "bag.left":                   { "en": "{count} left", "ar-KW": "باقي {count}", "ar-EG": "فاضل {count}" },
+  "browse.reserve.action":      { "en": "Reserve for {amount}", "ar-KW": "احجز بـ {amount}", "ar-EG": "احجز بـ {amount}" },
+
+  "checkout.total.label":       { "en": "Total to pay", "ar-KW": "المبلغ المطلوب", "ar-EG": "إجمالي المطلوب" },
+  "checkout.cash.confirm":      { "en": "You'll pay the store at pickup", "ar-KW": "تدفع للمتجر عند الاستلام", "ar-EG": "هتدفع للمحل وقت الاستلام" },
+  "checkout.processing":        { "en": "Taking payment — keep the app open", "ar-KW": "جارٍ تنفيذ الدفع — لا تغلق التطبيق", "ar-EG": "بننفّذ الدفع — ما تقفلش التطبيق" },
+  "checkout.payment_failed":    { "en": "Your bank declined it. Nothing was charged.", "ar-KW": "بنكك رفض العملية. ما انخصم شي.", "ar-EG": "البنك رفض العملية. مفيش أي خصم حصل." },
+
+  "order.confirmed":            { "en": "Reserved. It's yours.", "ar-KW": "تم الحجز. صارت لك.", "ar-EG": "اتحجزت. بقت بتاعتك." },
+  "order.cancelled":            { "en": "Cancelled and refunded", "ar-KW": "تم الإلغاء والاسترداد", "ar-EG": "اتلغى والفلوس راجعة" },
+  "order.no_show":              { "en": "Not collected — the store held it for you, so this one isn't refunded", "ar-KW": "لم يتم الاستلام — المتجر احتفظ بها لك، لذا لا يُسترد هذا الطلب", "ar-EG": "مااستلمتهاش — المحل حجزها ليك، عشان كده الطلب ده مش هيترد" },
+
+  "redeem.instruction":         { "en": "Show this at the counter", "ar-KW": "أظهر هذا عند الكاشير", "ar-EG": "وريه للكاشير" },
+  "redeem.success":             { "en": "Collected — enjoy", "ar-KW": "تم الاستلام — بالهناء", "ar-EG": "استلمتها — بالهنا والشفا" },
+  "redeem.running_late":        { "en": "Running late? Call the store.", "ar-KW": "متأخر؟ اتصل بالمتجر.", "ar-EG": "اتأخرت؟ كلّم المحل." },
+
+  "refund.issued":              { "en": "Refund sent to your bank", "ar-KW": "أُرسل الاسترداد إلى بنكك", "ar-EG": "الاسترداد اتبعت لبنكك" },
+  "review.request":             { "en": "How was it?", "ar-KW": "كيف كانت؟", "ar-EG": "كانت عاملة إيه؟" },
+  "impact.saved":               { "en": "{amount} saved since {month}", "ar-KW": "وفّرت {amount} منذ {month}", "ar-EG": "وفّرت {amount} من {month}" },
+  "referral.both":              { "en": "Both of you get credit", "ar-KW": "كلاكما يحصل على رصيد", "ar-EG": "هتاخدوا رصيد انتوا الاتنين" },
+  "safety.headline":            { "en": "Surplus. Not expired.", "ar-KW": "فائض. وليس منتهي الصلاحية.", "ar-EG": "فايض. مش منتهي الصلاحية." },
+
+  "window.opening":             { "en": "Pickup opens in {minutes} minutes", "ar-KW": "الاستلام يبدأ بعد {minutes} دقيقة", "ar-EG": "الاستلام هيبدأ بعد {minutes} دقيقة" },
+  "window.closing":             { "en": "{minutes} minutes left to collect", "ar-KW": "باقي {minutes} دقيقة للاستلام", "ar-EG": "فاضل {minutes} دقيقة على الاستلام" },
+
+  "listing.published":          { "en": "Listed — {count} bags, {window}", "ar-KW": "تم النشر — {count} بقش، {window}", "ar-EG": "اتنشرت — {count} بقش، {window}" },
+  "partner.cancel_warning":     { "en": "{count} customers have paid. Cancelling refunds them all and counts against your reliability.", "ar-KW": "{count} عملاء دفعوا. الإلغاء يستردّ لهم جميعاً ويُحتسب على موثوقيتك.", "ar-EG": "{count} عملاء دفعوا. الإلغاء هيرجّع لهم كلهم وهيتحسب على مصداقيتك." }
+}

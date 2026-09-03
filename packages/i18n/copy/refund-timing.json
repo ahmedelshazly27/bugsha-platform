@@ -1,0 +1,61 @@
+{
+  "_note": "Business rule 8: refund timing is stated AT THE MOMENT OF REFUND, not only in the policy document. Keyed (market, destination). Never hardcode a timing string in a component. Values are placeholders pending decision 10 and the chosen aggregator's actual clearing behaviour — confirm before launch.",
+
+  "KW.wallet": {
+    "en": "Instantly, as Bugsha credit",
+    "ar-KW": "فوراً كرصيد بقشة",
+    "ar-EG": "فوراً كرصيد بقشة"
+  },
+  "KW.knet": {
+    "en": "3–5 working days, back to your KNET card",
+    "ar-KW": "٣–٥ أيام عمل إلى بطاقة كي نت",
+    "ar-EG": "٣–٥ أيام عمل لبطاقة كي نت"
+  },
+  "KW.card": {
+    "en": "3–5 working days, back to your card",
+    "ar-KW": "٣–٥ أيام عمل إلى بطاقتك",
+    "ar-EG": "٣–٥ أيام عمل لبطاقتك"
+  },
+  "KW.apple_pay": {
+    "en": "3–5 working days, back to the card behind Apple Pay",
+    "ar-KW": "٣–٥ أيام عمل إلى البطاقة المرتبطة بـ Apple Pay",
+    "ar-EG": "٣–٥ أيام عمل للبطاقة المربوطة بـ Apple Pay"
+  },
+
+  "EG.wallet": {
+    "en": "Instantly, as Bugsha credit",
+    "ar-KW": "فوراً كرصيد بقشة",
+    "ar-EG": "فوراً كرصيد بقشة"
+  },
+  "EG.card": {
+    "en": "5–14 working days, back to your card",
+    "ar-KW": "٥–١٤ يوم عمل إلى بطاقتك",
+    "ar-EG": "٥–١٤ يوم عمل لبطاقتك"
+  },
+  "EG.mobile_wallet": {
+    "en": "1–3 working days, back to your wallet",
+    "ar-KW": "١–٣ أيام عمل إلى محفظتك",
+    "ar-EG": "١–٣ أيام عمل لمحفظتك"
+  },
+  "EG.instapay": {
+    "en": "1–3 working days, back to your bank",
+    "ar-KW": "١–٣ أيام عمل إلى بنكك",
+    "ar-EG": "١–٣ أيام عمل لبنكك"
+  },
+  "EG.fawry": {
+    "en": "As Bugsha credit — Fawry payments can't be reversed to the outlet",
+    "ar-KW": "كرصيد بقشة — لا يمكن إعادة دفعات فوري إلى المنفذ",
+    "ar-EG": "كرصيد بقشة — دفعات فوري مش بترجع للمنفذ"
+  },
+  "EG.cash": {
+    "en": "Nothing to refund — you hadn't paid yet",
+    "ar-KW": "لا يوجد ما يُسترد — لم تدفع بعد",
+    "ar-EG": "مفيش حاجة تترد — انت مادفعتش لسه"
+  },
+
+  "_caveat": {
+    "en": "Card timing depends on your bank's clearing, not ours. Wallet credit would have landed instantly.",
+    "ar-KW": "توقيت البطاقة يعتمد على مقاصة بنكك لا علينا. رصيد المحفظة يصل فوراً.",
+    "ar-EG": "توقيت البطاقة على مقاصة بنكك مش علينا. رصيد المحفظة بيوصل فوراً."
+  }
+}
