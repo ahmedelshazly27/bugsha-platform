@@ -6,7 +6,11 @@ Technical decisions made during the build that the spec did not settle. Append o
 
 | Date | Decision | Alternatives considered | Why | Reversible? |
 |---|---|---|---|---|
-| — | *(first entry goes here)* | | | |
+| 2026-09-03 | **D1** — `feature_flag` gets a surrogate `uuid` primary key; the spec's four-part key becomes a unique index over the same `coalesce` expressions | Four `not null` columns with `'*'` sentinels; a partial unique index per nullability combination | Postgres does not allow expressions in a `PRIMARY KEY`, so `03-schema.sql` as written does not execute. A unique index preserves the exact identity the spec describes, and the surrogate key gives future foreign keys a target. | Yes — drop the index, redefine the key |
+| 2026-09-03 | **D2** — added `create schema if not exists bi` to the RLS migration | Putting `consumer_masked` in `public`; dropping the BI role until phase 10 | `04-rls.sql` creates `bi.consumer_masked` and grants `usage on schema bi`, but never creates the schema, so the file does not execute. RLS test 15 depends on it. | Yes |
+| 2026-09-03 | **D3** — `create role bi_reader` wrapped in an existence check | Leaving it to fail on re-run; a separate one-shot bootstrap migration | Migrations are forward-only and re-run on every `supabase db reset`; `CREATE ROLE` has no `IF NOT EXISTS`, so a reset would abort. Roles are cluster-scoped, not database-scoped. | Yes |
+| 2026-09-03 | **D4** — extensions created into `extensions` (uuid-ossp, postgis, pg_net) and `cron` (pg_cron) rather than unqualified | Unqualified `create extension`, which lands them in `public` | Hosted Supabase keeps extensions out of `public`; putting postgis there would sit alongside the application tables and collide with the `alter table … enable row level security` sweep in `04-rls.sql`. `pg_cron` requires its own schema. | Yes — relocate with `alter extension … set schema` |
+| 2026-09-03 | **D5** — the app monorepo lives in `ahmedelshazly27/bugsha-platform`, not `bugsha` | Pushing into `bugsha`; renaming the site repo to `bugsha-site` | `docs/00-kickoff.md §1` asks for a repo named `bugsha`, but that name is already the live public marketing site (bugsha.app, Vercel). `CLAUDE.md` puts that site out of scope, and this codebase (schema, RLS, payout logic) should not be public. | Yes — rename either repo |
 
 ---
 
