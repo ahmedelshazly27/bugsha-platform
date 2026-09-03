@@ -1,0 +1,685 @@
+openapi: 3.1.0
+info:
+  title: Bugsha API
+  version: 1.0.0
+  description: |
+    Supabase-hosted. Three surfaces:
+      * PostgREST RPC at /rest/v1/rpc/<function>  — every mutation
+      * PostgREST tables/views at /rest/v1/<name> — reads under RLS
+      * Edge Functions at /functions/v1/<name>    — outbound I/O and webhooks
+
+    Every mutation takes p_idempotency (UUIDv4, reused across retries) and
+    returns the full resulting record. Errors are Postgres exceptions carrying a
+    BGxxx code; the client resolves the message from copy/errors.json.
+
+    Authoritative prose: docs/07-api.md. Keep the two in step.
+servers:
+  - url: https://{projectRef}.supabase.co
+    variables: { projectRef: { default: your-project } }
+
+security: [{ bearerAuth: [] }]
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    partnerApiKey: { type: apiKey, in: header, name: X-Bugsha-Key }
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+      description: Reused across retries. Same key + different payload → BG101.
+  schemas:
+    Money:
+      type: object
+      required: [minor, currency]
+      properties:
+        minor: { type: string, description: "Minor units as a string to survive JSON. KWD exp 3, EGP exp 2." }
+        currency: { type: string, enum: [KWD, EGP] }
+    Error:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, example: BG114 }
+        message_key: { type: string, example: listing.quantity_below_sold }
+        details: { type: object, additionalProperties: true }
+    BrowseListing:
+      type: object
+      properties:
+        listing_id: { type: string, format: uuid }
+        store_id: { type: string, format: uuid }
+        display_name: { type: string }
+        title_snapshot: { type: string }
+        category: { type: string }
+        price_minor: { type: string }
+        value_min_minor: { type: string }
+        value_max_minor: { type: string }
+        currency: { type: string, enum: [KWD, EGP] }
+        quantity_remaining: { type: integer }
+        local_start: { type: string, example: "21:00" }
+        local_end: { type: string, example: "22:00" }
+        window_start_utc: { type: string, format: date-time }
+        window_end_utc: { type: string, format: date-time }
+        distance_km: { type: number }
+        rating: { type: number }
+        rating_count: { type: integer }
+        dietary_flags: { type: array, items: { type: string } }
+    Order:
+      type: object
+      properties:
+        order_id: { type: string, format: uuid }
+        code: { type: string, example: 4K7-92, description: "Alphabet excludes 0/O 1/I/L 5/S 8/B" }
+        status:
+          type: string
+          enum: [held, reserved, redeemed, no_show, cancelled_consumer, cancelled_partner, refunded]
+        quantity: { type: integer }
+        total_minor: { type: string }
+        currency: { type: string }
+        commission_bp: { type: integer, description: "Stamped at creation. Never recomputed." }
+        commission_minor: { type: string, description: "Stamped at creation." }
+        contract_version_id: { type: string, format: uuid }
+        method: { type: string, enum: [knet, apple_pay, card, wallet, instapay, fawry, cash, wallet_credit] }
+        payment_status: { type: string }
+        window_start_utc: { type: string, format: date-time }
+        window_end_utc: { type: string, format: date-time }
+        hold_expires_at: { type: string, format: date-time, nullable: true }
+    RedeemResult:
+      type: object
+      properties:
+        order: { $ref: '#/components/schemas/Order' }
+        already_redeemed:
+          type: boolean
+          description: |
+            TRUE means this call found an existing redemption. This is SUCCESS,
+            not an error. Never surface it to staff as a failure — it is what
+            stops a second bag being handed over.
+        redeemed_by:
+          type: object
+          nullable: true
+          properties:
+            user_id: { type: string, format: uuid }
+            full_name: { type: string }
+            at: { type: string, format: date-time }
+        cash_due: { $ref: '#/components/schemas/Money' }
+        undo_expires_at: { type: string, format: date-time }
+  responses:
+    Err409: { description: Conflict, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Err403: { description: Not authorised, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Err428:
+      description: Four-eyes (BG130) or re-auth (BG131) required
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+paths:
+
+  # ── Consumer reads ────────────────────────────────────────────────────────
+  /rest/v1/v_browse_listing:
+    get:
+      summary: Browse feed
+      tags: [consumer]
+      parameters:
+        - { name: market, in: query, schema: { type: string, enum: [KW, EG] } }
+        - { name: city_id, in: query, schema: { type: string, format: uuid } }
+        - { name: order, in: query, schema: { type: string, example: "window_start_utc.asc" } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/BrowseListing' } }
+
+  /rest/v1/rpc/browse_nearby:
+    post:
+      summary: Geo browse with filters
+      tags: [consumer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_lat, p_lng, p_radius_m]
+              properties:
+                p_lat: { type: number }
+                p_lng: { type: number }
+                p_radius_m: { type: integer }
+                p_filters: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: OK }
+
+  /rest/v1/rpc/search_listings:
+    post:
+      summary: Search — diacritic- and hamza-insensitive Arabic matching
+      tags: [consumer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_query, p_market]
+              properties:
+                p_query: { type: string }
+                p_market: { type: string, enum: [KW, EG] }
+                p_city_id: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  # ── Consumer mutations ────────────────────────────────────────────────────
+  /rest/v1/rpc/hold_listing:
+    post:
+      summary: Hold a bag (decrements stock, starts the hold clock)
+      tags: [consumer]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_listing_id, p_quantity, p_idempotency]
+              properties:
+                p_listing_id: { type: string, format: uuid }
+                p_quantity: { type: integer, minimum: 1 }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Order in `held`
+          content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } }
+        '409':
+          $ref: '#/components/responses/Err409'
+          # BG110 sold out · BG111 window not open · BG113 cap reached · BG118 store paused
+
+  /rest/v1/rpc/confirm_order:
+    post:
+      summary: Confirm after payment capture. Idempotent on provider_ref.
+      description: |
+        Posts the capture ledger entries and moves the order to `reserved`.
+        Safe to call repeatedly for the same provider_ref — this is what makes
+        the retry-free ambiguous-return design safe.
+      tags: [consumer]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_provider_ref, p_idempotency]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_provider_ref: { type: string }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } } }
+        '409': { $ref: '#/components/responses/Err409' }
+
+  /rest/v1/rpc/reserve_cash_order:
+    post:
+      summary: Egypt cash on pickup. No payment row, no ledger entries.
+      tags: [consumer]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_idempotency]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+        '409': { $ref: '#/components/responses/Err409' }   # BG113 cash cap
+
+  /rest/v1/rpc/cancel_order:
+    post:
+      summary: Consumer cancellation. Enforces the 2-hour cutoff.
+      tags: [consumer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_reason_code]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_reason_code: { type: string }
+      responses:
+        '200': { description: OK }
+        '409': { $ref: '#/components/responses/Err409' }   # BG116 cutoff passed
+
+  /rest/v1/rpc/open_dispute:
+    post:
+      summary: Report a problem
+      description: |
+        Presence of p_illness_detail sets severity=critical, routes straight to
+        Compliance, and informs the partner WITHOUT asking them to triage it.
+      tags: [consumer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_category, p_statement]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_category: { type: string }
+                p_statement: { type: string }
+                p_photos: { type: array, items: { type: string } }
+                p_illness_detail:
+                  type: object
+                  properties:
+                    items: { type: array, items: { type: string } }
+                    eaten_at: { type: string, format: date-time }
+                    onset_at: { type: string, format: date-time }
+                    symptoms: { type: string }
+                    others_affected: { type: integer }
+      responses:
+        '200': { description: Case opened with a reference }
+
+  # ── Partner ───────────────────────────────────────────────────────────────
+  /rest/v1/rpc/publish_listing:
+    post:
+      summary: The 15-second path — one call, ≤ 3 taps
+      description: |
+        Copies title/description/value snapshots from the template so later
+        template edits never rewrite what a consumer bought against. Resolves
+        local intent to UTC via store.timezone.
+      tags: [partner]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_store_id, p_quantity, p_local_date, p_local_start, p_local_end, p_idempotency]
+              properties:
+                p_store_id: { type: string, format: uuid }
+                p_template_id: { type: string, format: uuid, nullable: true }
+                p_quantity: { type: integer, minimum: 1 }
+                p_local_date: { type: string, format: date }
+                p_local_start: { type: string, example: "21:00" }
+                p_local_end: { type: string, example: "22:00" }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: Listing }
+        '409': { $ref: '#/components/responses/Err409' }   # BG117 publishing blocked
+
+  /rest/v1/rpc/update_listing:
+    post:
+      summary: Quantity, price and window edits — server-enforced rules
+      description: |
+        Quantity up: always. Quantity down: only to units sold, and BG114 names
+        the sold count rather than silently clamping. Price: frozen after the
+        first sale (BG115). Staff role may change quantity only.
+      tags: [partner]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_listing_id]
+              properties:
+                p_listing_id: { type: string, format: uuid }
+                p_quantity: { type: integer, nullable: true }
+                p_price_minor: { type: string, nullable: true }
+                p_local_end: { type: string, nullable: true }
+      responses:
+        '200': { description: Listing }
+        '409': { $ref: '#/components/responses/Err409' }
+        '403': { $ref: '#/components/responses/Err403' }
+
+  /rest/v1/rpc/cancel_listing:
+    post:
+      summary: Cancel with a controlled reason
+      description: |
+        Refunds affected orders and notifies consumers. reason_code
+        'quality_concern' additionally writes a quality_flag for ops and
+        explicitly does NOT count against the partner.
+      tags: [partner]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_listing_id, p_reason_code]
+              properties:
+                p_listing_id: { type: string, format: uuid }
+                p_reason_code:
+                  type: string
+                  enum: [sold_through_trade, unexpected_closure, staffing, quality_concern, listed_in_error, other]
+                p_reason_text: { type: string }
+      responses:
+        '200': { description: Cancellation summary }
+
+  /rest/v1/rpc/redeem_order:
+    post:
+      summary: Hand over a bag. Idempotent. Works offline via a queued call.
+      description: |
+        already_redeemed=true is SUCCESS. Never render it to staff as an error —
+        that is what prevents a second hand-over. p_client_ts is set only when
+        the call was queued offline; the ledger records client and server time
+        separately.
+      tags: [partner]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_mechanism, p_idempotency]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_mechanism: { type: string, enum: [code_shown, qr_scanned] }
+                p_client_ts: { type: string, format: date-time, nullable: true }
+                p_staff_user: { type: string, format: uuid, nullable: true }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/RedeemResult' } } } }
+        '409': { $ref: '#/components/responses/Err409' }   # BG111 / BG112
+
+  /rest/v1/rpc/redeem_order_late:
+    post:
+      summary: Hand over inside the post-close grace
+      description: |
+        Records the grace flag and REVERSES the consumer's no-show count.
+        Without this path, staff redeem a different order to keep the peace and
+        the compliance ledger becomes fiction.
+      tags: [partner]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_idempotency]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+        '409': { $ref: '#/components/responses/Err409' }   # BG112 past grace
+
+  /rest/v1/rpc/collect_cash:
+    post:
+      summary: Egypt cash collection, including a short collection
+      description: Commission accrues on what was actually collected, not the listed price.
+      tags: [partner]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_collected_minor, p_idempotency]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_collected_minor: { type: string }
+                p_idempotency: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  # ── Ops ───────────────────────────────────────────────────────────────────
+  /rest/v1/rpc/ops_set_commission:
+    post:
+      summary: Change commission — writes a NEW contract version
+      description: |
+        Never updates the existing contract. Commission on historical orders is
+        resolved from the version stamped on the order, so a rate change can
+        never restate a closed period. Four eyes required.
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_partner_id, p_commission_bp, p_effective_from, p_reason_code, p_justification]
+              properties:
+                p_partner_id: { type: string, format: uuid }
+                p_commission_bp: { type: integer }
+                p_effective_from: { type: string, format: date }
+                p_reason_code: { type: string }
+                p_justification: { type: string, minLength: 10 }
+      responses:
+        '200': { description: New contract version }
+        '428': { $ref: '#/components/responses/Err428' }
+
+  /rest/v1/rpc/ops_force_cancel:
+    post:
+      summary: Force cancel with a refund
+      description: |
+        cost_bearer is explicit. The console defaults to `platform` whenever the
+        reason code indicates a platform failure — it must be hard to charge a
+        partner for our error.
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_order_id, p_reason_code, p_cost_bearer, p_justification]
+              properties:
+                p_order_id: { type: string, format: uuid }
+                p_reason_code: { type: string }
+                p_cost_bearer: { type: string, enum: [platform, partner] }
+                p_justification: { type: string }
+      responses:
+        '200': { description: OK }
+        '428': { $ref: '#/components/responses/Err428' }   # above the support refund cap
+
+  /rest/v1/rpc/ops_post_adjustment:
+    post:
+      summary: Manual ledger adjustment — balanced entries, reason mandatory
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_market, p_entries, p_reason_code, p_justification, p_effective_at]
+              properties:
+                p_market: { type: string, enum: [KW, EG] }
+                p_entries:
+                  type: array
+                  minItems: 2
+                  items:
+                    type: object
+                    required: [entry_type, account, amount_minor]
+                    properties:
+                      entry_type: { type: string, enum: [debit, credit] }
+                      account: { type: string }
+                      amount_minor: { type: string }
+                      partner_id: { type: string, format: uuid }
+                      order_id: { type: string, format: uuid }
+                p_reason_code: { type: string }
+                p_justification: { type: string, minLength: 10 }
+                p_effective_at: { type: string, format: date-time }
+      responses:
+        '200': { description: transaction_id }
+        '409': { $ref: '#/components/responses/Err409' }   # BG002 unbalanced · BG003 period locked
+        '428': { $ref: '#/components/responses/Err428' }
+
+  /rest/v1/rpc/ops_approve_payout_run:
+    post:
+      summary: Approve a payout run — four eyes plus fresh re-auth
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_run_id]
+              properties: { p_run_id: { type: string, format: uuid } }
+      responses:
+        '200': { description: Run approved; execution is a separate call }
+        '409': { description: Exceptions outstanding }
+        '428': { $ref: '#/components/responses/Err428' }   # BG130 / BG131
+
+  /rest/v1/rpc/ops_close_period:
+    post:
+      summary: Close and lock an accounting period
+      description: |
+        Returns the failing checklist rather than closing with warnings.
+        Requires: all three reconciliations clean, unreconciled_suspense at
+        zero, ledger balanced, statements issued, tax reports generated.
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_period_id]
+              properties: { p_period_id: { type: string, format: uuid } }
+      responses:
+        '200': { description: Locked }
+        '409':
+          description: Not closeable; body lists the failing checks
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  /rest/v1/rpc/ops_start_impersonation:
+    post:
+      summary: Read-only impersonation with a hard, non-extendable limit
+      tags: [ops]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [p_target_user, p_reason]
+              properties:
+                p_target_user: { type: string, format: uuid }
+                p_reason: { type: string }
+                p_consent_captured: { type: string }
+      responses:
+        '200': { description: Session with hard_expires_at }
+
+  # ── Edge Functions ────────────────────────────────────────────────────────
+  /functions/v1/create-payment:
+    post:
+      summary: Create a PSP session; returns a redirect URL or a Fawry reference
+      tags: [payments]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, method]
+              properties:
+                orderId: { type: string, format: uuid }
+                method: { type: string, enum: [knet, apple_pay, card, wallet, instapay, fawry] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providerRef: { type: string }
+                  redirectUrl: { type: string, nullable: true }
+                  fawryReference: { type: string, nullable: true }
+                  expiresAt: { type: string, format: date-time, nullable: true }
+
+  /functions/v1/confirm-payment:
+    post:
+      summary: Resolve payment status authoritatively from the provider
+      description: |
+        Calls adapter.getStatus(providerRef). NEVER trusts the return URL's
+        query parameters — the return tells you the user came back, the
+        provider's API tells you whether money moved. On `unknown`, returns
+        status=ambiguous and the client shows the reconciliation state with NO
+        retry control.
+      tags: [payments]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId]
+              properties: { orderId: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [captured, failed, cancelled, ambiguous] }
+                  order: { $ref: '#/components/schemas/Order' }
+                  retryAvailable: { type: boolean, description: false while ambiguous }
+
+  /functions/v1/psp-webhook-myfatoorah:
+    post:
+      summary: MyFatoorah webhook
+      description: |
+        Verifies the signature against the RAW body, appends a payment_event row
+        (always, even on invalid signature or duplicate), then calls
+        app.record_payment_event() which is idempotent on
+        (provider, provider_ref, event_type). Returns 200 quickly; retries are
+        the provider's job.
+      security: []
+      tags: [payments]
+      responses: { '200': { description: Acknowledged } }
+
+  /functions/v1/psp-webhook-tap:
+    post: { summary: Tap Payments webhook, security: [], tags: [payments], responses: { '200': { description: Acknowledged } } }
+
+  /functions/v1/psp-webhook-paymob:
+    post: { summary: Paymob webhook, security: [], tags: [payments], responses: { '200': { description: Acknowledged } } }
+
+  /functions/v1/generate-document:
+    post:
+      summary: Statement PDF+CSV, compliance ledger export, incident report, receipt
+      tags: [documents]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [statement, compliance_ledger, incident_report, receipt] }
+                partnerId: { type: string, format: uuid }
+                storeId: { type: string, format: uuid }
+                orderId: { type: string, format: uuid }
+                periodStart: { type: string, format: date }
+                periodEnd: { type: string, format: date }
+      responses:
+        '200':
+          description: Signed Storage URLs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pdfUrl: { type: string }
+                  csvUrl: { type: string, nullable: true }
+
+  # ── Partner external API (§11.1) ──────────────────────────────────────────
+  /functions/v1/partner-api-gateway/v1/partner/listings:
+    post:
+      summary: Create a listing (scope listings:write)
+      description: |
+        Thin adapter: validates the API key and calls the SAME app.* function
+        the app uses. If this gateway needs its own logic, the internal
+        function is wrong.
+      security: [{ partnerApiKey: [] }]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      tags: [partner-api]
+      responses: { '200': { description: Listing } }
+
+  /functions/v1/partner-api-gateway/v1/partner/orders:
+    get:
+      summary: List orders (scope orders:read)
+      security: [{ partnerApiKey: [] }]
+      tags: [partner-api]
+      responses: { '200': { description: Orders } }
+
+  /functions/v1/partner-api-gateway/v1/partner/orders/{id}/redeem:
+    post:
+      summary: Redeem (scope redeem:write). Idempotency-Key required.
+      security: [{ partnerApiKey: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      tags: [partner-api]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/RedeemResult' } } } }

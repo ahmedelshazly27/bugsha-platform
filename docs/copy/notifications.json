@@ -1,0 +1,173 @@
+{
+  "_note": "The 14 consumer templates from S-C-065 plus the partner set from S-P-038, in all three locales, each with a deep-link target. Ported from the design system's approved copy register (guidelines/consumer-copy.card.html) — do not rewrite. `bypasses_quiet_hours` is enforced in send-notification; the list is deliberately short.",
+
+  "consumer.order_confirmed": {
+    "deep_link": "bugsha://order/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Reserved at {store}", "ar-KW": "تم الحجز في {store}", "ar-EG": "اتحجزت في {store}" },
+    "body": { "en": "Code {code} · collect {window}", "ar-KW": "الرمز {code} · الاستلام {window}", "ar-EG": "الكود {code} · الاستلام {window}" }
+  },
+  "consumer.window_opening": {
+    "deep_link": "bugsha://order/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Pickup opens in {lead}", "ar-KW": "الاستلام يبدأ بعد {lead}", "ar-EG": "الاستلام هيبدأ بعد {lead}" },
+    "body": { "en": "{street} — {distance} from you", "ar-KW": "{street} — {distance} منك", "ar-EG": "{street} — {distance} منك" }
+  },
+  "consumer.window_closing_soon": {
+    "deep_link": "bugsha://redeem/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{minutes} minutes left to collect", "ar-KW": "باقي {minutes} دقيقة للاستلام", "ar-EG": "فاضل {minutes} دقيقة على الاستلام" },
+    "body": { "en": "The window closes at {time}.", "ar-KW": "ينتهي الوقت {time}.", "ar-EG": "الوقت بيقفل {time}." }
+  },
+  "consumer.collected": {
+    "deep_link": "bugsha://review/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Collected — enjoy it", "ar-KW": "تم الاستلام — بالهناء", "ar-EG": "استلمتها — بالهنا" },
+    "body": { "en": "Rate your bag in a tap.", "ar-KW": "قيّم بقشتك بضغطة.", "ar-EG": "قيّمها بضغطة واحدة." }
+  },
+  "consumer.cancelled_by_store": {
+    "deep_link": "bugsha://order/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{store} had to cancel", "ar-KW": "اضطر {store} للإلغاء", "ar-EG": "{store} اضطر يلغي" },
+    "body": { "en": "Full refund on the way, nothing for you to do.", "ar-KW": "الاسترداد كامل في طريقه، لا يلزمك شيء.", "ar-EG": "الفلوس راجعة كاملة، مش محتاج تعمل حاجة." }
+  },
+  "consumer.refund_issued": {
+    "deep_link": "bugsha://wallet",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Refund sent", "ar-KW": "أُرسل الاسترداد", "ar-EG": "الاسترداد اتبعت" },
+    "body": { "en": "{amount} is on its way to your bank.", "ar-KW": "{amount} في طريقها إلى بنكك.", "ar-EG": "{amount} في طريقها لبنكك." }
+  },
+  "consumer.saved_store_listed": {
+    "deep_link": "bugsha://store/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{store} just listed", "ar-KW": "{store} عرض الآن", "ar-EG": "{store} نزّل دلوقتي" },
+    "body": { "en": "{count} bags from {price}", "ar-KW": "{count} بقش من {price}", "ar-EG": "{count} بقش من {price}" }
+  },
+  "consumer.nearby_match": {
+    "deep_link": "bugsha://browse",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{count} bags near you tonight", "ar-KW": "{count} بقش قريبة منك الليلة", "ar-EG": "{count} بقش جنبك النهاردة" },
+    "body": { "en": "All within {distance}, all under {price}", "ar-KW": "كلها ضمن {distance} وبأقل من {price}", "ar-EG": "كلها في حدود {distance} وبأقل من {price}" }
+  },
+  "consumer.price_drop": {
+    "deep_link": "bugsha://store/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{store} dropped to {price}", "ar-KW": "{store} أصبح بـ {price}", "ar-EG": "{store} بقى بـ {price}" },
+    "body": { "en": "Closing time — the last bags are cheaper.", "ar-KW": "وقت الإغلاق — آخر البقش بسعر أقل.", "ar-EG": "وقت القفل — آخر البقش أرخص." }
+  },
+  "consumer.referral_completed": {
+    "deep_link": "bugsha://wallet",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{name} collected their first bag", "ar-KW": "{name} استلم أول بقشة", "ar-EG": "{name} استلم أول بقشة" },
+    "body": { "en": "{amount} credit added to your wallet.", "ar-KW": "أُضيف {amount} إلى محفظتك.", "ar-EG": "{amount} اتضاف لمحفظتك." }
+  },
+  "consumer.review_request": {
+    "deep_link": "bugsha://review/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "How was your bag from {store}?", "ar-KW": "كيف كانت بقشتك من {store}؟", "ar-EG": "بقشتك من {store} كانت عاملة إيه؟" },
+    "body": { "en": "One tap, and it helps the next person.", "ar-KW": "ضغطة واحدة، وتساعد من بعدك.", "ar-EG": "ضغطة واحدة، وبتساعد اللي بعدك." }
+  },
+  "consumer.campaign": {
+    "deep_link": "bugsha://campaign/:key",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Ramadan Kareem", "ar-KW": "رمضان كريم", "ar-EG": "رمضان كريم" },
+    "body": { "en": "Iftar surplus from {time}. Suhoor bakery from {time2}.", "ar-KW": "فائض الإفطار من {time}. مخبوزات السحور من {time2}.", "ar-EG": "فايض الإفطار من {time}. مخبوزات السحور من {time2}." }
+  },
+  "consumer.no_show": {
+    "deep_link": "bugsha://order/:id",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Your bag wasn't collected", "ar-KW": "لم تُستلم بقشتك", "ar-EG": "بقشتك مااستلمتهاش" },
+    "body": { "en": "The store set it aside for you, so this one isn't refunded. Tell us if something went wrong.", "ar-KW": "المتجر خصّصها لك، لذا لا يُسترد هذا الطلب. أخبرنا إن حدث خطأ.", "ar-EG": "المحل خصّصها ليك، عشان كده الطلب مش هيترد. قولنا لو حصل حاجة." }
+  },
+  "consumer.security_alert": {
+    "deep_link": "bugsha://account",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "New sign-in on {device}", "ar-KW": "تسجيل دخول جديد من {device}", "ar-EG": "تسجيل دخول جديد من {device}" },
+    "body": { "en": "Wasn't you? Secure your account.", "ar-KW": "ليس أنت؟ أمّن حسابك.", "ar-EG": "مش انت؟ أمّن حسابك." }
+  },
+
+  "partner.new_order": {
+    "deep_link": "bugsha-partner://orders",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "New order · {code}", "ar-KW": "طلب جديد · {code}", "ar-EG": "طلب جديد · {code}" },
+    "body": { "en": "{name} · {quantity} bag · {window}", "ar-KW": "{name} · {quantity} بقشة · {window}", "ar-EG": "{name} · {quantity} بقشة · {window}" }
+  },
+  "partner.order_cancelled": {
+    "deep_link": "bugsha-partner://orders",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{name} cancelled {code}", "ar-KW": "{name} ألغى {code}", "ar-EG": "{name} لغى {code}" },
+    "body": { "en": "Back on sale — the window is still open.", "ar-KW": "عادت للبيع — الوقت لا يزال مفتوحاً.", "ar-EG": "رجعت للبيع — الوقت لسه مفتوح." }
+  },
+  "partner.window_opening": {
+    "deep_link": "bugsha-partner://today",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Pickup opens in {lead}", "ar-KW": "الاستلام يبدأ بعد {lead}", "ar-EG": "الاستلام هيبدأ بعد {lead}" },
+    "body": { "en": "{count} orders to hand over.", "ar-KW": "{count} طلبات للتسليم.", "ar-EG": "{count} طلبات للتسليم." }
+  },
+  "partner.unredeemed_at_close": {
+    "deep_link": "bugsha-partner://orders",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "{count} orders unredeemed", "ar-KW": "{count} طلبات لم تُستلم", "ar-EG": "{count} طلبات مااستلمتش" },
+    "body": { "en": "The window closes at {time}. You keep the revenue either way.", "ar-KW": "ينتهي الوقت {time}. المبلغ لك في الحالتين.", "ar-EG": "الوقت بيقفل {time}. المبلغ ليك في الحالتين." }
+  },
+  "partner.listing_sold_out": {
+    "deep_link": "bugsha-partner://listings",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Sold out — {template}", "ar-KW": "نفدت — {template}", "ar-EG": "خلصت — {template}" },
+    "body": { "en": "{quantity} sold in {minutes} minutes. Add more?", "ar-KW": "بيعت {quantity} في {minutes} دقيقة. تضيف المزيد؟", "ar-EG": "اتباعت {quantity} في {minutes} دقيقة. تضيف كمان؟" }
+  },
+  "partner.schedule_published": {
+    "deep_link": "bugsha-partner://listings",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Tonight's bags are live", "ar-KW": "بقش الليلة منشورة", "ar-EG": "بقش النهاردة منشورة" },
+    "body": { "en": "{quantity} bags · {window} · published automatically", "ar-KW": "{quantity} بقش · {window} · نُشرت تلقائياً", "ar-EG": "{quantity} بقش · {window} · اتنشرت تلقائي" }
+  },
+  "partner.payout_sent": {
+    "deep_link": "bugsha-partner://money",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Payout sent · {amount}", "ar-KW": "تم التحويل · {amount}", "ar-EG": "التحويل اتبعت · {amount}" },
+    "body": { "en": "{orders} orders · statement ready to download.", "ar-KW": "{orders} طلباً · الكشف جاهز للتنزيل.", "ar-EG": "{orders} طلب · الكشف جاهز للتنزيل." }
+  },
+  "partner.payout_failed": {
+    "deep_link": "bugsha-partner://money",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "Your bank returned the transfer", "ar-KW": "أعاد بنكك التحويل", "ar-EG": "البنك رجّع التحويل" },
+    "body": { "en": "Nothing is lost — {amount} is held and added to the next payout once details are fixed.", "ar-KW": "لم يُفقد شيء — {amount} محتجزة وتُضاف للتحويل القادم بعد التصحيح.", "ar-EG": "مفيش حاجة اتضاعت — {amount} محتجزة وهتتضاف للتحويل الجاي بعد التصحيح." }
+  },
+  "partner.review_received": {
+    "deep_link": "bugsha-partner://reviews",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "{rating}★ from {name}", "ar-KW": "{rating}★ من {name}", "ar-EG": "{rating}★ من {name}" },
+    "body": { "en": "{excerpt}", "ar-KW": "{excerpt}", "ar-EG": "{excerpt}" }
+  },
+  "partner.quality_flag": {
+    "deep_link": "bugsha-partner://flags/:id",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "Quality flag — acknowledge within {hours} hours", "ar-KW": "بلاغ جودة — أقرّ خلال {hours} ساعات", "ar-EG": "بلاغ جودة — أقرّ خلال {hours} ساعات" },
+    "body": { "en": "Order {code}, reported {time}.", "ar-KW": "الطلب {code}، رُفع {time}.", "ar-EG": "الطلب {code}، اترفع {time}." }
+  },
+  "partner.document_expiring": {
+    "deep_link": "bugsha-partner://documents",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "{document} expires in {days} days", "ar-KW": "{document} تنتهي خلال {days} يوماً", "ar-EG": "{document} بتنتهي خلال {days} يوم" },
+    "body": { "en": "Upload the renewal early — new listings stop the day it lapses.", "ar-KW": "ارفع التجديد مبكراً — يتوقف النشر يوم انتهائها.", "ar-EG": "ارفع التجديد بدري — النشر بيتوقف يوم ما تنتهي." }
+  },
+  "partner.document_expired": {
+    "deep_link": "bugsha-partner://documents",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "New listings paused — {document} expired", "ar-KW": "العروض الجديدة موقوفة — انتهت {document}", "ar-EG": "العروض الجديدة موقوفة — {document} خلصت" },
+    "body": { "en": "Bags already sold are unaffected. Customers will collect as normal.", "ar-KW": "البقش المباعة غير متأثرة. سيستلمها العملاء كالمعتاد.", "ar-EG": "البقش المبيعة مش متأثرة. العملاء هيستلموها عادي." }
+  },
+  "partner.contract_change": {
+    "deep_link": "bugsha-partner://contract",
+    "bypasses_quiet_hours": false,
+    "title": { "en": "Your commission changes on {date}", "ar-KW": "تتغير عمولتك في {date}", "ar-EG": "عمولتك هتتغير في {date}" },
+    "body": { "en": "{old} → {new}. Orders before that date keep the old rate.", "ar-KW": "{old} ← {new}. الطلبات قبل ذلك التاريخ تحتفظ بالنسبة القديمة.", "ar-EG": "{old} ← {new}. الطلبات قبل التاريخ ده بتفضل بالنسبة القديمة." }
+  },
+  "partner.status_change": {
+    "deep_link": "bugsha-partner://today",
+    "bypasses_quiet_hours": true,
+    "title": { "en": "Your account status changed", "ar-KW": "تغيّرت حالة حسابك", "ar-EG": "حالة حسابك اتغيرت" },
+    "body": { "en": "{reason}", "ar-KW": "{reason}", "ar-EG": "{reason}" }
+  }
+}

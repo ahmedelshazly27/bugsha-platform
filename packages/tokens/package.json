@@ -1,0 +1,6 @@
+{
+  "name": "@bugsha/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts"
+}

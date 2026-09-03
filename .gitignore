@@ -1,0 +1,16 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.expo/
+.turbo/
+
+# secrets — nothing provider-related is ever committed (01-architecture.md §3)
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+
+.DS_Store
+*.log

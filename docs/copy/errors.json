@@ -1,0 +1,201 @@
+{
+  "_note": "Server raises a BGxxx code; the client resolves the message here. Never display a raw server string. Copy states what happened and what to do next — never a code, never 'an error occurred'. See docs/07-api.md for the code table.",
+
+  "BG100": {
+    "en": "You don't have access to that",
+    "ar-KW": "لا تملك صلاحية لذلك",
+    "ar-EG": "مش معاك صلاحية لده"
+  },
+  "BG101": {
+    "en": "That request changed while we were processing it. Start again.",
+    "ar-KW": "تغيّر الطلب أثناء المعالجة. ابدأ من جديد.",
+    "ar-EG": "الطلب اتغير وإحنا بنعمله. ابدأ من الأول."
+  },
+  "BG110": {
+    "en": "Someone got the last one",
+    "ar-KW": "شخص آخر أخذ الأخيرة",
+    "ar-EG": "حد خد الأخيرة"
+  },
+  "BG110.body": {
+    "en": "It sold while you were paying. You have not been charged.",
+    "ar-KW": "نفدت أثناء دفعك. لم يُخصم منك شيء.",
+    "ar-EG": "اتحجزت وانت بتدفع. مفيش أي خصم حصل."
+  },
+  "BG111": {
+    "en": "Pickup opens at {time}",
+    "ar-KW": "الاستلام يبدأ {time}",
+    "ar-EG": "الاستلام هيبدأ {time}"
+  },
+  "BG112": {
+    "en": "This window closed at {time}",
+    "ar-KW": "انتهى وقت الاستلام {time}",
+    "ar-EG": "وقت الاستلام قفل {time}"
+  },
+  "BG113": {
+    "en": "{cap} is the most per person here",
+    "ar-KW": "{cap} هو الحد لكل شخص",
+    "ar-EG": "{cap} هو الحد للفرد"
+  },
+  "BG113.body": {
+    "en": "So more people get one. The cap lifts after a few collected orders.",
+    "ar-KW": "حتى يحصل عدد أكبر على نصيبه. يرتفع الحد بعد عدة طلبات مستلمة.",
+    "ar-EG": "عشان عدد أكبر ياخد نصيبه. الحد بيزيد بعد كام طلب مستلم."
+  },
+  "BG114": {
+    "en": "You can't go below {sold}",
+    "ar-KW": "لا يمكن النزول تحت {sold}",
+    "ar-EG": "مش هينفع تحت {sold}"
+  },
+  "BG114.body": {
+    "en": "{sold} customers have already paid for this listing. Cancel it if you genuinely cannot supply them — they'll be refunded in full.",
+    "ar-KW": "{sold} عملاء دفعوا بالفعل. ألغِ العرض إن كنت لا تستطيع توفيرها — سيُسترد لهم المبلغ كاملاً.",
+    "ar-EG": "{sold} عملاء دفعوا خلاص. ألغي العرض لو فعلاً مش قادر توفرها — الفلوس هترجعلهم كاملة."
+  },
+  "BG115": {
+    "en": "Price is frozen after the first sale",
+    "ar-KW": "السعر مُجمّد بعد أول عملية بيع",
+    "ar-EG": "السعر مقفول بعد أول بيعة"
+  },
+  "BG115.body": {
+    "en": "Price changes after a sale are the top cause of customer complaints. Create a new listing instead.",
+    "ar-KW": "تغيير السعر بعد البيع أكبر سبب لشكاوى العملاء. أنشئ عرضاً جديداً بدلاً من ذلك.",
+    "ar-EG": "تغيير السعر بعد البيع أكبر سبب لشكاوى العملاء. اعمل عرض جديد بدل كده."
+  },
+  "BG116": {
+    "en": "Free cancellation ended at {time}",
+    "ar-KW": "انتهى الإلغاء المجاني {time}",
+    "ar-EG": "الإلغاء المجاني خلص {time}"
+  },
+  "BG116.body": {
+    "en": "After that the store has already packed your bag.",
+    "ar-KW": "بعدها يكون المتجر قد جهّز بقشتك.",
+    "ar-EG": "بعد كده المحل يكون جهّز بقشتك."
+  },
+  "BG117": {
+    "en": "New listings are paused for this branch",
+    "ar-KW": "العروض الجديدة موقوفة لهذا الفرع",
+    "ar-EG": "العروض الجديدة موقوفة للفرع ده"
+  },
+  "BG117.body": {
+    "en": "Your food permit expired. Bags already sold are unaffected — customers will collect as normal.",
+    "ar-KW": "انتهت رخصتك الغذائية. البقش المباعة غير متأثرة وسيستلمها العملاء كالمعتاد.",
+    "ar-EG": "رخصتك الغذائية خلصت. البقش المبيعة مش متأثرة والعملاء هيستلموها عادي."
+  },
+  "BG118": {
+    "en": "This store is paused until {time}",
+    "ar-KW": "هذا المتجر متوقف حتى {time}",
+    "ar-EG": "المحل ده متوقف لحد {time}"
+  },
+  "BG130": {
+    "en": "A second approver is needed",
+    "ar-KW": "مطلوب موافقة ثانية",
+    "ar-EG": "مطلوب موافقة تانية"
+  },
+  "BG131": {
+    "en": "Confirm your password to continue",
+    "ar-KW": "أكّد كلمة المرور للمتابعة",
+    "ar-EG": "أكّد كلمة السر للمتابعة"
+  },
+  "BG140": {
+    "en": "We're checking your payment",
+    "ar-KW": "نتحقق من دفعتك",
+    "ar-EG": "بنتأكد من الدفع"
+  },
+  "BG140.body": {
+    "en": "You came back from the bank before we heard the result. Don't pay again — if it didn't go through, your bag stays reserved for 10 minutes.",
+    "ar-KW": "عدت من البنك قبل وصول النتيجة. لا تدفع مرة أخرى — إن لم تُنفّذ الدفعة تبقى بقشتك محجوزة ١٠ دقائق.",
+    "ar-EG": "رجعت من البنك قبل ما توصلنا النتيجة. ما تدفعش تاني — لو الدفع مانفعش بقشتك محجوزة ١٠ دقايق."
+  },
+  "BG150": {
+    "en": "This can't be completed yet",
+    "ar-KW": "لا يمكن إتمام هذا بعد",
+    "ar-EG": "مش هينفع نكمل ده لسه"
+  },
+  "BG150._internal": "Tax configuration undecided for this market (decision 1). Surfaced to ops, never to a consumer — the flow that would hit it must be gated by a feature flag before launch.",
+
+  "network.offline": {
+    "en": "You're offline",
+    "ar-KW": "أنت غير متصل",
+    "ar-EG": "انت مش متصل"
+  },
+  "network.offline.body": {
+    "en": "Showing what we had at {time}. Prices and stock may have moved.",
+    "ar-KW": "نعرض ما كان متاحاً {time}. قد تتغير الأسعار والكميات.",
+    "ar-EG": "بنعرض اللي كان موجود {time}. الأسعار والكميات ممكن تكون اتغيرت."
+  },
+  "network.action_needs_connection": {
+    "en": "Reserving needs a connection",
+    "ar-KW": "الحجز يتطلب اتصالاً",
+    "ar-EG": "الحجز محتاج اتصال"
+  },
+  "payment.declined": {
+    "en": "Your bank declined it",
+    "ar-KW": "رفض بنكك العملية",
+    "ar-EG": "البنك رفض العملية"
+  },
+  "payment.declined.body": {
+    "en": "Nothing was charged. This is usually a daily limit or an online-payment block — your bank can lift both.",
+    "ar-KW": "لم يُخصم أي مبلغ. عادة يكون السبب حد يومي أو حظر الدفع الإلكتروني — بنكك يستطيع رفعهما.",
+    "ar-EG": "مفيش أي خصم حصل. عادة بيكون حد يومي أو حظر للدفع الإلكتروني — البنك يقدر يشيلهم."
+  },
+  "otp.incorrect": {
+    "en": "That code didn't match",
+    "ar-KW": "الرمز غير مطابق",
+    "ar-EG": "الكود مش مطابق"
+  },
+  "otp.attempts_left": {
+    "en": "{n} attempts left before a 15-minute lock",
+    "ar-KW": "{n} محاولات قبل قفل ١٥ دقيقة",
+    "ar-EG": "{n} محاولات قبل قفل ١٥ دقيقة"
+  },
+  "otp.locked": {
+    "en": "Too many attempts",
+    "ar-KW": "محاولات كثيرة",
+    "ar-EG": "محاولات كتير"
+  },
+  "otp.locked.body": {
+    "en": "Try again in 15 minutes, or contact support and we'll verify you another way.",
+    "ar-KW": "حاول بعد ١٥ دقيقة، أو تواصل مع الدعم للتحقق بطريقة أخرى.",
+    "ar-EG": "حاول بعد ١٥ دقيقة، أو كلّم الدعم ونتحقق منك بطريقة تانية."
+  },
+  "phone.kw_eight_digits": {
+    "en": "Kuwaiti numbers have 8 digits",
+    "ar-KW": "الأرقام الكويتية من ٨ خانات",
+    "ar-EG": "الأرقام الكويتية ٨ خانات"
+  },
+  "phone.eg_ten_digits": {
+    "en": "Egyptian numbers have 10 digits",
+    "ar-KW": "الأرقام المصرية من ١٠ خانات",
+    "ar-EG": "الأرقام المصرية ١٠ خانات"
+  },
+  "template.alcohol_forbidden": {
+    "en": "Alcohol can't be listed on Bugsha",
+    "ar-KW": "لا يمكن عرض الكحول على بقشة",
+    "ar-EG": "الكحول مش بينعرض على بقشة"
+  },
+  "template.price_fraction": {
+    "en": "Maximum is {max} — half the stated value",
+    "ar-KW": "الحد الأقصى {max} — نصف القيمة المعلنة",
+    "ar-EG": "الحد الأقصى {max} — نص القيمة المعلنة"
+  },
+  "template.price_bounds": {
+    "en": "Price must be between {min} and {max}",
+    "ar-KW": "يجب أن يكون السعر بين {min} و {max}",
+    "ar-EG": "السعر لازم يكون بين {min} و {max}"
+  },
+  "template.value_range": {
+    "en": "The upper value can't be less than the lower one",
+    "ar-KW": "القيمة العليا لا يمكن أن تكون أقل من الدنيا",
+    "ar-EG": "القيمة الأعلى مش تقدر تكون أقل من الأدنى"
+  },
+  "template.description_required": {
+    "en": "Describe what's usually inside, in at least one language",
+    "ar-KW": "اكتب وصفاً للمحتوى المعتاد بلغة واحدة على الأقل",
+    "ar-EG": "اكتب وصف للمحتوى المعتاد بلغة واحدة على الأقل"
+  },
+  "adjustment.unbalanced": {
+    "en": "Debits and credits must match",
+    "ar-KW": "يجب تطابق المدين والدائن",
+    "ar-EG": "المدين والدائن لازم يتطابقوا"
+  }
+}
