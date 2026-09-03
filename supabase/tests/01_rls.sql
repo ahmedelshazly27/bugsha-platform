@@ -4,7 +4,7 @@
 -- Requires 00_helpers.sql to have run first (pg_prove runs files in order).
 -- ============================================================================
 begin;
-select plan(38);
+select plan(46);
 
 -- ─── 1. Staff at store A cannot read orders at store B, same partner ────────
 select tests.authenticate_as(tests.uid('staff', 1));   -- staff at store 1
@@ -204,6 +204,36 @@ select lives_ok(
        set constraints all immediate;
      end $x$; $$,
   '14b: the same shape, balanced, is accepted');
+
+-- ─── D14. Views must not bypass RLS ────────────────────────────────────────
+-- Regression for a confirmed leak: both views were SECURITY DEFINER, so they
+-- ran as their owner and ignored every policy. Query the VIEW, not the table —
+-- that is precisely what the original suite failed to do.
+select tests.authenticate_as(tests.uid('staff', 1));
+select is_empty($$ select * from v_ledger_balance $$,
+  'D14a: staff read no ledger balance row through the view either');
+
+select tests.authenticate_as(tests.uid('ops', 1));
+select is_empty($$ select * from v_ledger_balance $$,
+  'D14b: a support agent reads no ledger balance row');
+
+select tests.authenticate_as(tests.uid('ops', 3));   -- finance, KW-scoped
+select isnt_empty($$ select * from v_ledger_balance where market = 'KW' $$,
+  'D14c: KW finance still sees KW balances — the fix did not just break it');
+select is_empty($$ select * from v_ledger_balance where market = 'EG' $$,
+  'D14d: KW finance sees nothing Egyptian through the view');
+select is_empty($$ select id from financial_entry where market = 'EG' $$,
+  'D14e: nor any Egyptian entry on the table');
+
+select tests.authenticate_as(tests.uid('ops', 9));   -- finance, EG-scoped
+select isnt_empty($$ select * from v_ledger_balance where market = 'EG' $$,
+  'D14f: EG finance sees EG balances');
+select is_empty($$ select * from v_ledger_balance where market = 'KW' $$,
+  'D14g: and nothing Kuwaiti');
+
+select tests.authenticate_as_anon();
+select isnt_empty($$ select listing_id from v_browse_listing $$,
+  'D14h: anonymous browsing still works under invoker semantics');
 
 select * from finish();
 rollback;
