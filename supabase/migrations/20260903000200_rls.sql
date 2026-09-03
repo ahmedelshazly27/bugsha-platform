@@ -77,8 +77,13 @@ end $$;
 create policy own_user on app_user for select using (id = auth.uid());
 create policy own_user_update on app_user for update using (id = auth.uid()) with check (id = auth.uid());
 
+-- DECISION D9: the spec wrote `or app.is_ops()` with no market predicate, which
+-- lets a KW-scoped ops user read Egyptian consumer PII — the exact thing RLS
+-- test 7 (12-test-plan.md §RLS) says must not happen, and which the ops section
+-- of this file states is "not optional". Scoped to match.
 create policy own_profile on consumer_profile for select
-  using (user_id = auth.uid() or app.is_ops());
+  using (user_id = auth.uid()
+         or (app.is_ops() and market = any(app.current_markets())));
 create policy own_profile_update on consumer_profile for update
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 -- No consumer-side insert: app.complete_profile() owns creation.
@@ -113,16 +118,21 @@ create policy payment_ops on payment for select
 create policy refund_consumer on refund for select
   using (exists (select 1 from "order" o where o.order_id = refund.order_id and o.consumer_id = auth.uid()));
 
+-- DECISION D9 (cont.): same defect on the wallet.
 create policy wallet_own on wallet_transaction for select
-  using (consumer_id = auth.uid() or app.is_ops());
+  using (consumer_id = auth.uid()
+         or (app.is_ops() and market = any(app.current_markets())));
 
 create policy review_public on review for select
   using (published or consumer_id = auth.uid()
          or app.can_store(store_id, array['owner','manager']::partner_role[]) or app.is_ops());
 -- Insert guarded by app.submit_review(): only a redeemed order qualifies (rule 9).
 
+-- DECISION D9 (cont.): same defect on dispute. Permissive policies OR together,
+-- so an unscoped one here would defeat the scoped ops_dispute_rw below.
 create policy dispute_own on dispute for select
-  using (consumer_id = auth.uid() or app.is_ops());
+  using (consumer_id = auth.uid()
+         or (app.is_ops() and market = any(app.current_markets())));
 
 create policy notif_own on notification_log for select
   using (recipient_user = auth.uid() or app.is_ops());

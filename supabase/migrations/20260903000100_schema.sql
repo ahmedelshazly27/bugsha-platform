@@ -21,6 +21,11 @@ create extension if not exists pg_net     with schema extensions;
 create schema if not exists cron;
 create extension if not exists pg_cron    with schema cron;
 
+-- DECISION D4 (cont.): with postgis in `extensions`, the geography type is not
+-- visible unqualified. Put it on the search path for the rest of this migration
+-- so `geography(point,4326)` resolves in city.centroid and store.location.
+set search_path = public, extensions;
+
 create schema if not exists app;   -- business logic functions
 comment on schema app is 'Business logic. Callers are clients via RPC; every function is security definer and asserts authorisation explicitly.';
 
@@ -102,7 +107,15 @@ create table market_config (
   approved_by_2             uuid,
   updated_at                timestamptz not null default now(),
   constraint four_eyes_distinct check (approved_by_1 is null or approved_by_1 <> approved_by_2),
-  constraint vat_coherent check (not vat_applies or (vat_bp is not null and vat_base is not null))
+  -- DECISION D6: the spec's constraint was
+  --   check (not vat_applies or (vat_bp is not null and vat_base is not null))
+  -- which makes Egypt's launch row unrepresentable: 13-config.md seeds EG with
+  -- vat_applies = true while decision 1 keeps vat_bp and vat_base null. Setting
+  -- vat_applies = false instead would make resolve_tax() return zero silently —
+  -- the precise failure 13-config.md §2 forbids. This permits the undecided
+  -- state (both null, code raises BG150) and still rejects a half-configured one.
+  constraint vat_coherent check ((vat_bp is null) = (vat_base is null)),
+  constraint vat_off_is_unset check (vat_applies or (vat_bp is null and vat_base is null))
 );
 
 create table market_config_history (like market_config);
