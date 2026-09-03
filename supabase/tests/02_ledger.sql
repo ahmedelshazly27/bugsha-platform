@@ -104,7 +104,7 @@ select is(
   (select e.amount_minor from financial_entry e
    join "order" o on o.order_id = e.order_id
    where o.code = 'D6N-3P' and e.account = 'commission_revenue'),
-  (select div(c.collected_minor * o.commission_bp + 5000, 10000)
+  (select div(c.collected_minor * o.commission_bp + 5000, 10000)::bigint
    from "order" o join cash_collection c on c.order_id = o.order_id
    where o.code = 'D6N-3P'),
   'L6c: commission on a short collection is computed on collected_minor');
@@ -136,7 +136,7 @@ select is(
   'L11: a platform-funded goodwill credit never debits partner_payable');
 
 -- ─── L18. Rounding ──────────────────────────────────────────────────────────
-select is(div(1750::bigint * 2200 + 5000, 10000), 385::bigint,
+select is(div(1750::bigint * 2200 + 5000, 10000)::bigint, 385::bigint,
   'L18: 22% of 1750 is 385, round-half-up at the minor unit');
 
 -- ─── L20/L21. Payout behaviour ──────────────────────────────────────────────

@@ -122,21 +122,17 @@ insert into staff_assignment (user_id, partner_id, store_id, role, partner_wide,
 
 -- ─── Documents ──────────────────────────────────────────────────────────────
 -- Every required type, approved, except one food permit that has expired.
+-- Partner-level documents (everything that is not per-store).
 insert into partner_document (partner_id, store_id, market, doc_type, storage_path,
                               status, expires_on, verified_at)
-select p.partner_id,
-       case when r.per_store then s.store_id else null end,
-       p.market, r.doc_type,
+select p.partner_id, null, p.market, r.doc_type,
        'fixtures/' || p.partner_id || '/' || r.doc_type || '.pdf',
        'approved'::doc_status,
        case when r.requires_expiry then (now() + interval '300 days')::date else null end,
        now() - interval '60 days'
 from partner p
 join market_document_requirement r on r.market = p.market
-left join lateral (
-  select st.store_id from store st where st.partner_id = p.partner_id order by st.store_id limit 1
-) s on r.per_store
-where not (r.per_store and r.doc_type in ('food_permit','health_licence'));
+where not r.per_store;
 
 -- Per-store food permits / health licences, one of them expired.
 insert into partner_document (partner_id, store_id, market, doc_type, storage_path,

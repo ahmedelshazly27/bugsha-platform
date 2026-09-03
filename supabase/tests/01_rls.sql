@@ -40,15 +40,18 @@ select is_empty($$ select order_id from "order" $$,
 
 -- ─── 4. Manager may invite staff, but not another manager (BG100) ───────────
 select tests.authenticate_as(tests.uid('staff', 3));
+-- The invitee must be an existing partner_user: staff_assignment has a foreign
+-- key to it, so inviting an unknown uuid raises 23503, not BG100, and the test
+-- would pass for the wrong reason. Staff 7 works at another store today.
 select lives_ok(
-  $$ select app.invite_staff(tests.uid('staff', 20),
-       'dddddddd-0000-4000-8000-000000000001',
-       'eeeeeeee-0000-4000-8000-000000000001', 'staff') $$,
+  $$ select app.invite_staff('bbbbbbbb-0000-4000-8000-000000000007'::uuid,
+       'dddddddd-0000-4000-8000-000000000001'::uuid,
+       'eeeeeeee-0000-4000-8000-000000000001'::uuid, 'staff') $$,
   '4a: a manager may invite a staff member');
 select throws_ok(
-  $$ select app.invite_staff(tests.uid('staff', 21),
-       'dddddddd-0000-4000-8000-000000000001',
-       'eeeeeeee-0000-4000-8000-000000000001', 'manager') $$,
+  $$ select app.invite_staff('bbbbbbbb-0000-4000-8000-000000000002'::uuid,
+       'dddddddd-0000-4000-8000-000000000001'::uuid,
+       'eeeeeeee-0000-4000-8000-000000000001'::uuid, 'manager') $$,
   'BG100',
   null,
   '4b: a manager may not invite another manager');
@@ -169,23 +172,38 @@ select ok(not has_table_privilege('bi_reader', 'public.consumer_profile', 'SELEC
   '15c: bi_reader cannot reach consumer_profile at all');
 
 -- ─── 14. An unbalanced transaction is rejected at commit (BG002) ───────────
--- Last, because forcing the deferred constraint leaves trigger events pending;
--- the file ends in ROLLBACK, so nothing escapes.
-select lives_ok(
-  $$ select app.post_entries(gen_random_uuid(), jsonb_build_array(
-       jsonb_build_object('entry_type','debit','account','platform_bank',
-         'amount_minor',100,'currency','KWD','market','KW',
-         'reference_type','adjustment','reference_id',gen_random_uuid(),
-         'effective_at',now()),
-       jsonb_build_object('entry_type','credit','account','commission_revenue',
-         'amount_minor',90,'currency','KWD','market','KW',
-         'reference_type','adjustment','reference_id',gen_random_uuid(),
-         'effective_at',now()))) $$,
-  '14a: an unbalanced transaction inserts without complaint while deferred');
+-- The post and the constraint check both happen inside throws_ok's implicit
+-- subtransaction, so the half-written transaction is rolled back there and
+-- never reaches COMMIT. A balanced control in the identical shape follows, so
+-- this cannot pass for the wrong reason.
 select throws_ok(
-  'set constraints all immediate',
+  $$ do $x$
+     begin
+       perform app.post_entries(gen_random_uuid(), jsonb_build_array(
+         jsonb_build_object('entry_type','debit','account','platform_bank',
+           'amount_minor',100,'currency','KWD','market','KW',
+           'reference_type','adjustment','reference_id',gen_random_uuid(),'effective_at',now()),
+         jsonb_build_object('entry_type','credit','account','commission_revenue',
+           'amount_minor',90,'currency','KWD','market','KW',
+           'reference_type','adjustment','reference_id',gen_random_uuid(),'effective_at',now())));
+       set constraints all immediate;
+     end $x$; $$,
   'BG002', null,
-  '14b: and is rejected the moment the constraint is checked');
+  '14a: an unbalanced transaction_id is rejected when the constraint is checked');
+
+select lives_ok(
+  $$ do $x$
+     begin
+       perform app.post_entries(gen_random_uuid(), jsonb_build_array(
+         jsonb_build_object('entry_type','debit','account','platform_bank',
+           'amount_minor',100,'currency','KWD','market','KW',
+           'reference_type','adjustment','reference_id',gen_random_uuid(),'effective_at',now()),
+         jsonb_build_object('entry_type','credit','account','commission_revenue',
+           'amount_minor',100,'currency','KWD','market','KW',
+           'reference_type','adjustment','reference_id',gen_random_uuid(),'effective_at',now())));
+       set constraints all immediate;
+     end $x$; $$,
+  '14b: the same shape, balanced, is accepted');
 
 select * from finish();
 rollback;
