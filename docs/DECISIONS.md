@@ -58,3 +58,21 @@ These are recorded so nobody spends a day re-deciding them. The reasoning is in 
               in Postgres, which §1 of the architecture doc requires.
             | Yes — drop the column and the index |
 ```
+
+## D17 — `translate()` Arabic normalisation map
+`app.normalise_ar` uses `translate(x, 'أإآىة', 'ااايه')`. The earlier map had four targets for five sources, so `ة` was deleted instead of mapped. Fixed to five-for-five.
+
+## D18 — Trigram search calls `extensions.similarity()` directly
+Under `set search_path = ''` the `%` operator from pg_trgm does not resolve. Search functions call `extensions.similarity(a, b) > 0.3` explicitly. Same threshold as the operator's default.
+
+## D19 — `dispute.opened_on` is a real column
+The one-open-dispute-per-order-per-day constraint needs a date. `opened_at::date` is not immutable (session time zone), so `opened_on date not null default current_date` is stored and indexed.
+
+## D20 — `payout_allocation` link table
+Which ledger entries a payout paid is recorded in `payout_allocation(payout_id, entry_id)`. A failed payout deletes its allocations, freeing the entries for the next run (L21). Entries never move; the link does.
+
+## D21 — `ops_confirm_payout` refuses unknown or non-executing payouts
+Confirming a payout that does not exist, or is not in `executing`, raises `BG100`. Before the guard an unknown id was a silent no-op, which a bank-file reconciliation could mistake for success.
+
+## D22 — Client offline store is expo-sqlite behind `@bugsha/offline`'s interface
+`@bugsha/offline` stays pure TypeScript (tested with an in-memory store). `apps/partner/src/offline/store.ts` is the SQLite implementation. Codes are hashed with SHA-256 on device so the mirror never holds a redemption code in plain text.

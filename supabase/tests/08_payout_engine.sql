@@ -1,0 +1,24 @@
+-- Phase 11: L7, L20, L21, L22 through the real run; four eyes + re-auth.
+begin; select plan(9);
+delete from tests.p11;
+select set_config('role','authenticated',true), set_config('request.jwt.claims', json_build_object('sub', tests.uid('ops',3)::text, 'role','authenticated','auth_time', extract(epoch from now())::bigint)::text, true);
+insert into tests.p11 select 'run', app.ops_create_payout_run('KW', current_date - 30, current_date);
+select ok((select (v->>'payouts')::int >= 1 from tests.p11 where k='run'), 'PE-1: a run freezes and aggregates per partner');
+select is((select count(*)::int from payout where run_id = (select (v->>'run_id')::uuid from tests.p11 where k='run') and net_minor < 0), 0, 'L20: no payout is negative');
+select set_config('request.jwt.claims', json_build_object('sub', tests.uid('ops',3)::text, 'role','authenticated','auth_time', extract(epoch from now() - interval '1 hour')::bigint)::text, true);
+select throws_ok($$ select app.ops_approve_payout_run((select (v->>'run_id')::uuid from tests.p11 where k='run')) $$, 'BG131', null, 'PE-3: stale auth is refused');
+select tests.clear_auth(); update payout set status='ready', hold_reason=null where run_id=(select (v->>'run_id')::uuid from tests.p11 where k='run');
+select set_config('role','authenticated',true), set_config('request.jwt.claims', json_build_object('sub', tests.uid('ops',3)::text, 'role','authenticated','auth_time', extract(epoch from now())::bigint)::text, true);
+insert into tests.p11 select 'a1', app.ops_approve_payout_run((select (v->>'run_id')::uuid from tests.p11 where k='run'));
+select is((select v->>'status' from tests.p11 where k='a1'), 'pending_approval', 'PE-4: first approver -> pending');
+select set_config('request.jwt.claims', json_build_object('sub', tests.uid('ops',6)::text, 'role','authenticated','auth_time', extract(epoch from now())::bigint)::text, true);
+insert into tests.p11 select 'a2', app.ops_approve_payout_run((select (v->>'run_id')::uuid from tests.p11 where k='run'));
+select is((select (v->>'approved')::boolean from tests.p11 where k='a2'), true, 'PE-5: a second, distinct approver approves');
+insert into tests.p11 select 'exec', app.ops_execute_payout_run((select (v->>'run_id')::uuid from tests.p11 where k='run'));
+select ok((select jsonb_array_length(v->'bank_file') >= 1 from tests.p11 where k='exec'), 'PE-7: bank-file rows produced');
+insert into tests.p11 select 'fail', to_jsonb(app.ops_confirm_payout((select payout_id from payout where run_id=(select (v->>'run_id')::uuid from tests.p11 where k='run') and status='executing' limit 1), 'BANK-REJ', false, 'IBAN failed'));
+select is((select v->>'status' from tests.p11 where k='fail'), 'pending', 'L21: a failed payout reverts to pending');
+select tests.clear_auth();
+select is_empty($$ select 1 from payout_allocation where payout_id = (select (v->>'payout_id')::uuid from tests.p11 where k='fail') $$, 'L21b: its entries are freed for the next run');
+select is_empty($$ select currency from financial_entry group by currency having sum(case when entry_type='debit' then amount_minor else -amount_minor end) <> 0 $$, 'L24: balanced after a full cycle');
+select * from finish(); rollback;

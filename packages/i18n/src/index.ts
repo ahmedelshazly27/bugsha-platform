@@ -7,6 +7,9 @@
 import common from '../copy/common.json' with { type: 'json' };
 import errors from '../copy/errors.json' with { type: 'json' };
 import refundTiming from '../copy/refund-timing.json' with { type: 'json' };
+import account from '../copy/account.json' with { type: 'json' };
+import checkout from '../copy/checkout.json' with { type: 'json' };
+import fulfilment from '../copy/fulfilment.json' with { type: 'json' };
 import { interpolate } from './bidi';
 
 export * from './numerals';
@@ -19,7 +22,7 @@ export type LocaleCode = (typeof LOCALES)[number];
 export type LocalisedString = Record<LocaleCode, string>;
 
 const REGISTERS: Record<string, Record<string, unknown>> = {
-  common: common as Record<string, unknown>,
+  common: { ...common, ...account, ...checkout, ...fulfilment } as Record<string, unknown>,
   errors: errors as Record<string, unknown>,
   'refund-timing': refundTiming as Record<string, unknown>,
 };

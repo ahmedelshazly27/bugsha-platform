@@ -1,0 +1,4 @@
+import { useState } from 'react'; import { useOps, useOpsMutation } from '@bugsha/api'; import { Screen, ListRow, Button, Notice } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+export default function D() { const q = useOps<any[]>(db, 'ops_disputes'); const resolve = useOpsMutation(db, 'ops_resolve_dispute'); const [msg, setMsg] = useState('');
+  return <Screen title="Disputes">{msg ? <Notice>{msg}</Notice> : null}{q.data?.map((d) => <ListRow key={d.id} title={`${d.case_ref} · ${d.severity}`} subtitle={`${d.category} · SLA ${d.sla_due_at}${d.illness_detail ? ' · ILLNESS — Compliance' : ''}`}
+    trailing={<Button onPress={() => resolve.mutateAsync({ p_dispute: d.id, p_resolution: 'resolved with goodwill', p_outcome: { kind: 'goodwill', amount_minor: 500, reason_code: 'goodwill' } }).then(() => { setMsg('Resolved'); q.refetch(); }, (e) => setMsg(e.code))}>Goodwill</Button>} />)}</Screen>; }

@@ -1,6 +1,4 @@
-{
-  "name": "@bugsha/api",
-  "version": "0.0.0",
-  "private": true,
-  "main": "src/index.ts"
-}
+{ "name": "@bugsha/api", "version": "0.0.0", "private": true, "type": "module", "main": "src/index.ts",
+  "scripts": { "typecheck": "tsc --noEmit", "gen:types": "supabase gen types typescript --project-id fxjvxmuporiwpqalbddv --schema public,app > src/database.types.ts" },
+  "dependencies": { "@supabase/supabase-js": "^2.45.4", "@tanstack/react-query": "^5.59.0", "@bugsha/core": "workspace:*" },
+  "devDependencies": { "typescript": "^5.6.3", "@types/react": "^18.3.11" } }

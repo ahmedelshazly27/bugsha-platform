@@ -1,0 +1,10 @@
+{ "_note": "S-C-050 … S-C-058. Authored per register.",
+  "auth.phone": { "en": "Phone number", "ar-KW": "رقم الهاتف", "ar-EG": "رقم الموبايل" },
+  "auth.send_code": { "en": "Send code", "ar-KW": "أرسل الرمز", "ar-EG": "ابعت الكود" },
+  "auth.code": { "en": "Code", "ar-KW": "الرمز", "ar-EG": "الكود" },
+  "auth.verify": { "en": "Continue", "ar-KW": "متابعة", "ar-EG": "كمّل" },
+  "account.title": { "en": "Account", "ar-KW": "الحساب", "ar-EG": "حسابي" },
+  "account.sign_out": { "en": "Sign out", "ar-KW": "تسجيل الخروج", "ar-EG": "خروج" },
+  "wallet.balance": { "en": "Bugsha credit", "ar-KW": "رصيد بقشة", "ar-EG": "رصيد بقشة" },
+  "orders.title": { "en": "Your bags", "ar-KW": "بقشك", "ar-EG": "بقشك" },
+  "orders.empty": { "en": "No bags yet", "ar-KW": "ما عندك بقش بعد", "ar-EG": "لسه معندكش بقش" } }

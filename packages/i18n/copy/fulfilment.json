@@ -1,0 +1,9 @@
+{ "_note": "S-C-040 … S-C-047.",
+  "order.cancel": { "en": "Cancel this bag", "ar-KW": "إلغاء هذه البقشة", "ar-EG": "ألغي البقشة دي" },
+  "order.status.held": { "en": "Held", "ar-KW": "محجوزة مؤقتاً", "ar-EG": "محجوزة مؤقت" },
+  "order.status.reserved": { "en": "Reserved", "ar-KW": "محجوزة", "ar-EG": "متحجزة" },
+  "order.status.redeemed": { "en": "Collected", "ar-KW": "تم الاستلام", "ar-EG": "اتستلمت" },
+  "order.status.no_show": { "en": "Not collected", "ar-KW": "لم تُستلم", "ar-EG": "ماتستلمتش" },
+  "order.status.cancelled_consumer": { "en": "Cancelled", "ar-KW": "ملغاة", "ar-EG": "اتلغت" },
+  "order.status.cancelled_partner": { "en": "Cancelled by the store", "ar-KW": "ألغاها المتجر", "ar-EG": "المحل لغاها" },
+  "order.status.refunded": { "en": "Refunded", "ar-KW": "مستردة", "ar-EG": "الفلوس رجعت" } }

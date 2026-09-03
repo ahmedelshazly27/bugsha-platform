@@ -1,0 +1,3 @@
+import { Text } from 'react-native'; import { useOps } from '@bugsha/api'; import { Screen, Stat } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+export default function D() { const kw = useOps<any>(db, 'ops_live_dashboard', { p_market: 'KW' }); const eg = useOps<any>(db, 'ops_live_dashboard', { p_market: 'EG' });
+  return <Screen title="Live"><Text>Kuwait</Text>{kw.data && Object.entries(kw.data).map(([k, v]) => <Stat key={k} label={k} value={String(v)} />)}<Text>Egypt</Text>{eg.data && Object.entries(eg.data).map(([k, v]) => <Stat key={k} label={k} value={String(v)} />)}</Screen>; }

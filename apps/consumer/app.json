@@ -1,0 +1,5 @@
+{ "expo": { "name": "Bugsha consumer", "slug": "bugsha-consumer", "scheme": "bugsha", "version": "0.1.0", "orientation": "portrait", "userInterfaceStyle": "automatic",
+  "ios": { "bundleIdentifier": "org.bugsha.consumer", "supportsTablet": true }, "android": { "package": "org.bugsha.consumer" },
+  "web": { "bundler": "metro", "output": "single" }, "platforms": ["ios","android"],
+  "plugins": ["expo-router", "expo-secure-store", "expo-sqlite", "expo-localization", ["expo-notifications", { "icon": "./assets/icon.png" }]],
+  "extra": { "eas": { "projectId": "" } } } }

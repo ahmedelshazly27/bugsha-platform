@@ -1,0 +1,5 @@
+import { useState } from 'react'; import { useOps, useOpsMutation } from '@bugsha/api'; import { Screen, ListRow, Field, Button, Notice } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+export default function O() { const [code, setCode] = useState(''); const q = useOps<any[]>(db, 'ops_orders', { p_code: code || null }); const cancel = useOpsMutation(db, 'ops_force_cancel'); const [msg, setMsg] = useState('');
+  return <Screen title="Orders"><Field label="Code" value={code} onChangeText={setCode} />{msg ? <Notice>{msg}</Notice> : null}
+    {q.data?.map((o) => <ListRow key={o.order_id} title={`${o.code} · ${o.status}`} subtitle={`${o.market} ${o.total_minor} ${o.currency}`}
+      trailing={<Button tone="ghost" onPress={() => cancel.mutateAsync({ p_order: o.order_id, p_reason_code: 'consumer_request', p_cost_bearer: 'platform', p_justification: 'platform error — consumer not at fault' }).then(() => { setMsg('Cancelled, platform bears cost'); q.refetch(); }, (e) => setMsg(e.code))}>Force cancel (platform)</Button>} />)}</Screen>; }

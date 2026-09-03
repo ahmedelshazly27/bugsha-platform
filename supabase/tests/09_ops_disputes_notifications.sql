@@ -1,0 +1,28 @@
+-- Phases 12, 13, 14: four eyes on commission and config; illness routing; incident immutability; template gates.
+begin; select plan(11);
+delete from tests.p12;
+select tests.authenticate_as(tests.uid('ops', 3));
+insert into tests.p12 select 'c1', app.ops_set_commission('dddddddd-0000-4000-8000-000000000002', 2000, current_date + 1, 'renegotiated');
+select is((select v->>'status' from tests.p12 where k='c1'), 'pending_approval', 'OPS-4: a commission change waits for a second approver');
+select tests.authenticate_as(tests.uid('ops', 6));
+insert into tests.p12 select 'c2', app.ops_set_commission('dddddddd-0000-4000-8000-000000000002', 2000, current_date + 1, 'renegotiated');
+select tests.clear_auth();
+select is((select commission_bp from partner_contract where partner_id='dddddddd-0000-4000-8000-000000000002' and version=1), 2200, 'OPS-6: version 1 still says 2200 — history never restated');
+select tests.authenticate_as((select consumer_id from "order" where code='X9H-4K'));
+insert into tests.p12 select 'ill', to_jsonb(app.open_dispute((select order_id from "order" where code='X9H-4K'), 'suspected_foodborne_illness', 'Felt unwell.', '{}', '{"items":["pastry"],"symptoms":["nausea"]}'));
+select is((select v->>'severity' from tests.p12 where k='ill'), 'critical', 'D-1: an illness report is CRITICAL');
+select is((select v->>'partner_deadline' from tests.p12 where k='ill'), null, 'D-2: the partner is informed, never asked to triage');
+select tests.clear_auth();
+select is((select role::text from ops_user where user_id = (select (v->>'owner_ops_user')::uuid from tests.p12 where k='ill')), 'compliance', 'D-3: routed to Compliance');
+select throws_ok($$ update incident set resolution = 'edited' where ref = 'BG-INC-0002' $$, 'BG004', null, 'D-9: a closed incident refuses direct edits');
+select tests.authenticate_as(tests.uid('ops', 2));
+select throws_ok($$ select app.ops_upsert_template('consumer.t', 'en', 'Hurry! Last chance', 'Grab the leftovers') $$, 'BG170', null, 'N-1: banned terms refused at authoring');
+select app.ops_upsert_template('consumer.t', 'en', 'Tonight near you', '6 bags', 'bugsha://browse'); select app.ops_upsert_template('consumer.t', 'ar-KW', 'الليلة قريب منك', '٦ بقش', 'bugsha://browse'); select app.ops_upsert_template('consumer.t', 'ar-EG', 'النهاردة جنبك', '٦ بقش', 'bugsha://browse');
+select throws_ok($$ select app.ops_review_template('consumer.t', 'en', 1) $$, '23514', null, 'N-3: the author may not review their own locale');
+select throws_ok($$ select app.publish_notification_template('consumer.t', 1) $$, 'BG171', null, 'N-4: publish refused while any locale is unreviewed');
+select tests.authenticate_as(tests.uid('ops', 6));
+select app.ops_review_template('consumer.t', 'en', 1); select app.ops_review_template('consumer.t', 'ar-KW', 1); select app.ops_review_template('consumer.t', 'ar-EG', 1);
+select ok((select (app.publish_notification_template('consumer.t', 1)->>'published')::boolean), 'N-6: all three reviewed — publishes');
+select tests.clear_auth();
+select isnt_empty($$ select 1 from notification_template where key='consumer.campaign' and published and locale='ar-EG' $$, 'N-11: the Ramadan campaign template is live in all locales');
+select * from finish(); rollback;

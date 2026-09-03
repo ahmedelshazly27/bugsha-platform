@@ -1,0 +1,6 @@
+{ "_note": "S-C-030 … S-C-036.",
+  "checkout.pay": { "en": "Pay {amount}", "ar-KW": "ادفع {amount}", "ar-EG": "ادفع {amount}" },
+  "checkout.hold_expires": { "en": "Held for you", "ar-KW": "محجوزة لك", "ar-EG": "محجوزة ليك" },
+  "safety.contents_vary": { "en": "Contents vary — the store decides what goes in. Allergies? Ask at the counter.", "ar-KW": "المحتويات تختلف — المتجر يقرر ما يضعه. عندك حساسية؟ اسأل عند الكاشير.", "ar-EG": "المحتويات بتختلف — المحل بيقرر يحط إيه. عندك حساسية؟ اسأل عند الكاشير." },
+  "common.cancel": { "en": "Cancel", "ar-KW": "إلغاء", "ar-EG": "إلغاء" },
+  "common.retry": { "en": "Try again", "ar-KW": "حاول مرة أخرى", "ar-EG": "جرّب تاني" } }
