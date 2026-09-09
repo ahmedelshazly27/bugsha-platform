@@ -35,8 +35,12 @@
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "947d5e49-0e8f-4552-be72-c1546ee0dfd0"
+      },
+      "router": {
+        "origin": false
       }
-    }
+    },
+    "owner": "bugsha"
   }
 }
