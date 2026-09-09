@@ -19,5 +19,11 @@
   "devDependencies": {
     "@types/node": "^22.20.1",
     "eas-cli": "^23.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
   }
 }

@@ -1,0 +1,2 @@
+{ "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile", "buildCommand": "npx expo export --platform web", "outputDirectory": "dist", "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
