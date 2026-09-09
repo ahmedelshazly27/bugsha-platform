@@ -8,4 +8,6 @@ const storage = Platform.OS === 'web'
   ? { getItem: async (k: string) => globalThis.localStorage?.getItem(k) ?? null, setItem: async (k: string, v: string) => { globalThis.localStorage?.setItem(k, v); }, removeItem: async (k: string) => { globalThis.localStorage?.removeItem(k); } }
   : { getItem: SecureStore.getItemAsync, setItem: SecureStore.setItemAsync, removeItem: SecureStore.deleteItemAsync };
 
-export const db = createBugshaClient(process.env.EXPO_PUBLIC_SUPABASE_URL!, process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!, storage);
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL; const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+if (!url || !key) throw new Error('MISSING_ENV: EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY are not set for this build (EAS environment variables or .env).');
+export const db = createBugshaClient(url, key, storage);
