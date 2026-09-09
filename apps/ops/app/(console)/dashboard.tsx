@@ -1,3 +1,4 @@
-import { Text } from 'react-native'; import { useOps } from '@bugsha/api'; import { Screen, Stat } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+import { View } from 'react-native'; import { useOps } from '@bugsha/api'; import { Eyebrow, PartnerStat, T } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+const Grid = ({ d }: { d: Record<string, unknown> | undefined }) => <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{d ? Object.entries(d).map(([k, v]) => <PartnerStat key={k} label={k.replace(/_/g, ' ')} value={String(v)} style={{ minWidth: 180, flex: 0 }} />) : null}</View>;
 export default function D() { const kw = useOps<any>(db, 'ops_live_dashboard', { p_market: 'KW' }); const eg = useOps<any>(db, 'ops_live_dashboard', { p_market: 'EG' });
-  return <Screen title="Live"><Text>Kuwait</Text>{kw.data && Object.entries(kw.data).map(([k, v]) => <Stat key={k} label={k} value={String(v)} />)}<Text>Egypt</Text>{eg.data && Object.entries(eg.data).map(([k, v]) => <Stat key={k} label={k} value={String(v)} />)}</Screen>; }
+  return <><T role="titleLg" weight={700}>Live</T><Eyebrow>Kuwait</Eyebrow><Grid d={kw.data} /><Eyebrow>Egypt</Eyebrow><Grid d={eg.data} /></>; }

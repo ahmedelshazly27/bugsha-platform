@@ -1,1 +1,2 @@
-import { Redirect } from 'expo-router'; export default function I() { return <Redirect href="/(console)/dashboard" />; }
+import { Redirect } from 'expo-router'; import { useSession } from '../src/lib/session';
+export default function I() { const { userId } = useSession(); return <Redirect href={userId ? '/(console)/dashboard' : '/signin'} />; }

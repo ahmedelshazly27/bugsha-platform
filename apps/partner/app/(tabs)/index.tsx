@@ -1,13 +1,26 @@
-// S-P-010 — Today: next window, listings, gross, alerts. Cold start ≤ 3 s on 3G.
-import { Text } from 'react-native'; import { useToday } from '@bugsha/api'; import { Screen, Stat, Notice, ListRow } from '@bugsha/ui';
-import { db } from '../../src/lib/supabase'; import { useStore } from '../../src/lib/store';
+// §4.1 Today — priority order is fixed: next window countdown, live listings, then money. Create-listing is always primary; redeem beside it.
+import { router } from 'expo-router'; import { Pressable, ScrollView, View } from 'react-native';
+import { useToday } from '@bugsha/api';
+import { Banner, BrandBar, Button, Caption, Card, CountdownPill, Eyebrow, Foot, Icon, Logo, Mark, Num, PartnerStat, T, color, radius } from '@bugsha/ui';
+import { db } from '../../src/lib/supabase'; import { useStore } from '../../src/lib/store'; import { hm, minutesLeft, money, useL } from '../../src/lib/ui';
 export default function Today() {
-  const { storeId } = useStore(); const q = useToday(db, storeId) as any; const d = q.data;
-  if (!d) return <Screen title="Today"><Text>…</Text></Screen>;
-  return <Screen title={d.store.display_name}>
-    {d.store.publishing_blocked && <Notice tone="warn">New listings paused — existing orders are honoured.</Notice>}
-    <Stat label="Gross today" value={String(d.gross_today_minor)} /><Stat label="Outstanding" value={String(d.orders_outstanding)} />
-    {d.listings_today?.map((l: any) => <ListRow key={l.listing_id} title={l.title} subtitle={`${l.quantity_remaining}/${l.quantity_total} · ${l.status}`} />)}
-    {d.alerts?.map((a: any, i: number) => <Notice key={i} tone="warn">{a.doc_type} expires {a.expires_on}</Notice>)}
-  </Screen>;
+  const s = useStore(); const { L, ar } = useL(); const q = useToday(db, s.storeId) as any; const d = q.data;
+  const next = d?.next_window; const mins = next ? minutesLeft(next.window_end_utc) : null;
+  const listings = (d?.listings_today ?? []) as any[]; const sold = listings.reduce((a, l) => a + (l.quantity_total - l.quantity_remaining), 0); const total = listings.reduce((a, l) => a + l.quantity_total, 0);
+  return <View style={{ flex: 1 }}>
+    <BrandBar><View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}><Mark size={19} color="#fff" fold={color.brandSurface} foldOpacity={1} /><T role="label" weight={600} color="#fff" style={{ flex: 1 }} numberOfLines={1}>{`${s.tradingName} — ${s.storeName}`}</T><Pressable accessibilityLabel={L('Switch branch', 'تبديل الفرع')} onPress={() => s.clear()}><Icon name="chevron-down" size={20} color="#fff" /></Pressable></View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
+        <View><Caption color="rgba(255,255,255,.78)">{L('Next window closes', 'أقرب وقت ينتهي')}</Caption><Num weight={700} color="#fff" style={{ fontSize: 30, lineHeight: 34 }}>{mins == null ? '—' : mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} m` : `${mins} min`}</Num></View>
+        <View style={{ alignItems: 'flex-end' }}><Caption color="rgba(255,255,255,.78)">{L("Today's gross", 'إجمالي اليوم')}</Caption><Num weight={700} color="#fff" style={{ fontSize: 20, lineHeight: 26 }}>{money(d?.gross_today_minor ?? 0, s.market)}</Num></View></View></BrandBar>
+    <ScrollView contentContainerStyle={{ padding: 14, gap: 12 }}>
+      {d?.store?.publishing_blocked ? <Banner tone="error" title={L('New listings paused', 'النشر متوقف')}>{L('A required document has lapsed. Existing orders are honoured.', 'انتهت وثيقة مطلوبة. الطلبات الحالية تُنفّذ.')}</Banner> : null}
+      {(d?.alerts ?? []).map((a: any, i: number) => <Banner key={i} tone="time" title={L(`${a.doc_type.replace(/_/g, ' ')} expires ${a.expires_on}`, `${a.doc_type.replace(/_/g, ' ')} تنتهي ${a.expires_on}`)}>{L('Upload the renewal early — listings stop the day it lapses.', 'ارفع التجديد مبكراً — يتوقف النشر يوم انتهائها.')}</Banner>)}
+      <View style={{ flexDirection: 'row', gap: 10 }}><PartnerStat label={L('Sold today', 'المباع اليوم')} value={String(sold)} sub={L(`of ${total} listed`, `من ${total} معروضة`)} icon="package" /><PartnerStat label={L('Waiting', 'بالانتظار')} value={String(d?.orders_outstanding ?? 0)} sub={L('to collect', 'للاستلام')} icon="circle-check" tone={(d?.orders_outstanding ?? 0) > 0 ? 'urgent' : 'fresh'} /></View>
+      <Eyebrow>{L('Live listings', 'العروض النشطة')}</Eyebrow>
+      {listings.length === 0 ? <Card><Caption>{L('Nothing listed today yet. List a bag before close.', 'لم يُعرض شيء اليوم بعد. أضف بقشة قبل الإغلاق.')}</Caption></Card> : listings.map((l) => { const ml = minutesLeft(l.window_end_utc); const pct = l.quantity_total ? (l.quantity_total - l.quantity_remaining) / l.quantity_total : 0; return <Card key={l.listing_id}><View style={{ gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><T weight={700} style={{ flex: 1 }}>{l.title}</T>{l.status === 'sold_out' || l.quantity_remaining === 0 ? <CountdownPill label={L('Sold out', 'نفدت')} state="reserved" /> : <CountdownPill minutesLeft={ml} state="reserved" format={(m) => (ar ? `باقي ${m} د` : `${m} min left`)} />}</View>
+        <View style={{ height: 5, borderRadius: 99, backgroundColor: color.sunken, overflow: 'hidden' }}><View style={{ width: `${Math.round(pct * 100)}%`, height: '100%', backgroundColor: color.brand }} /></View>
+        <View style={{ flexDirection: 'row', gap: 4 }}><Num role="caption" color={color.textSecondary}>{`${l.quantity_total - l.quantity_remaining}/${l.quantity_total}`}</Num><Caption>{L('sold ·', 'مباعة ·')}</Caption><Num role="caption" color={color.textSecondary}>{`${hm(l.window_start_utc, s.timezone)}–${hm(l.window_end_utc, s.timezone)}`}</Num></View></View></Card>; })}
+    </ScrollView>
+    <Foot><View style={{ flexDirection: 'row', gap: 8 }}><Button variant="secondary" size="lg" iconStart="qr-code" style={{ flex: 1 }} onPress={() => router.push('/redeem')}>{L('Redeem', 'استلام')}</Button><Button size="lg" iconStart="plus" style={{ flex: 1 }} onPress={() => router.navigate('/(tabs)/listings')}>{L('List a bag', 'أضف بقشة')}</Button></View></Foot></View>;
 }
