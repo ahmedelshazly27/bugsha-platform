@@ -1,2 +1,3 @@
--- Applied via MCP as screen_support_rpcs; see the statement in supabase_migrations.schema_migrations. Mirrored for the repo.
--- (saved_store, notification prefs, my_profile/update_profile, upsert_bag_template, my_staff, invite_staff_by_email, my_reviews, my_documents, my_partner)
+-- Mirrored from bugsha-dev (migration screen_support_rpcs, applied 2026-09-09).
+-- saved_store + toggle/list/notify; notification prefs; my_profile/update_profile; my_staff; invite_staff_by_email; my_reviews; my_documents; my_partner.
+-- Canonical text: select statements from supabase_migrations.schema_migrations where name = 'screen_support_rpcs'.

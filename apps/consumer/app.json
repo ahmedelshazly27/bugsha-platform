@@ -10,7 +10,8 @@
       "bundleIdentifier": "org.bugsha.consumer",
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Attach a photo to a report or a document."
       }
     },
     "android": {
@@ -39,7 +40,13 @@
           "icon": "./assets/icon.png"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Bugsha sorts bags by how far you would actually drive. It never tracks you in the background."
+        }
+      ]
     ],
     "extra": {
       "eas": {

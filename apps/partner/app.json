@@ -10,7 +10,8 @@
       "bundleIdentifier": "org.bugsha.partner",
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Attach a photo to a report or a document."
       }
     },
     "android": {
@@ -39,7 +40,14 @@
           "icon": "./assets/icon.png"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Used once to place your store pin."
+        }
+      ],
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {
