@@ -42,7 +42,10 @@
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "6687e2c4-6e4a-4055-aa7f-0b79d2efa048"
+      },
+      "router": {
+        "origin": false
       }
     },
     "icon": "./assets/icon.png",
@@ -52,10 +55,11 @@
       "backgroundColor": "#5B21B6"
     },
     "updates": {
-      "url": ""
+      "url": "https://u.expo.dev/6687e2c4-6e4a-4055-aa7f-0b79d2efa048"
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "owner": "bugsha"
   }
 }
