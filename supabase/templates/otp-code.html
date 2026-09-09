@@ -1,0 +1,31 @@
+<!-- Bugsha sign-in code. Paste into Supabase → Authentication → Emails → "Magic Link" AND "Confirm sign up".
+     Subject: Your Bugsha code: {{ .Token }}
+     Two colours only: violet #5B21B6 and white; ink ramp for text. No images, so it renders everywhere. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7FB;padding:32px 16px;font-family:Archivo,'Helvetica Neue',Arial,sans-serif;color:#17141F">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:420px;background:#FFFFFF;border:1px solid #E7E4EE;border-radius:10px">
+      <tr><td style="background:#5B21B6;padding:18px 24px;border-radius:10px 10px 0 0">
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+          <td style="width:22px;height:22px;background:#FFFFFF;transform:rotate(45deg);border-radius:1px"></td>
+          <td style="padding-left:14px;color:#FFFFFF;font-size:22px;font-weight:600;letter-spacing:-0.03em">Bugsha</td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:28px 24px 8px;font-size:17px;line-height:26px">
+        Your sign-in code<br>
+        <span style="color:#6B6579;font-size:15px">رمز تسجيل الدخول</span>
+      </td></tr>
+      <tr><td style="padding:8px 24px 4px">
+        <div dir="ltr" style="font-family:'IBM Plex Mono',Menlo,Consolas,monospace;font-size:40px;line-height:48px;font-weight:700;letter-spacing:0.18em;color:#17141F;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:16px;text-align:center">{{ .Token }}</div>
+      </td></tr>
+      <tr><td style="padding:12px 24px 0;font-size:15px;line-height:22px;color:#312B40">
+        Type it in the app. It works for 10 minutes and once only.<br>
+        <span style="color:#6B6579">اكتبه في التطبيق. صالح 10 دقائق ولمرة وحدة.</span>
+      </td></tr>
+      <tr><td style="padding:20px 24px 28px;font-size:13px;line-height:18px;color:#9A94A8">
+        Didn't ask for this? Ignore it — nobody can sign in without the code.<br>
+        <span>ما طلبت الرمز؟ تجاهل هالرسالة — محد يقدر يدخل بدونه.</span>
+      </td></tr>
+    </table>
+    <div style="padding:16px;font-size:12px;color:#9A94A8">Bugsha · بقشة</div>
+  </td></tr>
+</table>

@@ -1,5 +1,42 @@
-{ "expo": { "name": "Bugsha ops", "slug": "bugsha-ops", "scheme": "bugsha-ops", "version": "0.1.0", "orientation": "portrait", "userInterfaceStyle": "automatic",
-  "ios": { "bundleIdentifier": "org.bugsha.ops", "supportsTablet": true }, "android": { "package": "org.bugsha.ops" },
-  "web": { "bundler": "metro", "output": "single" }, "platforms": ["web"],
-  "plugins": ["expo-router", "expo-secure-store", "expo-sqlite", "expo-localization", ["expo-notifications", { "icon": "./assets/icon.png" }]],
-  "extra": { "eas": { "projectId": "" } } } }
+{
+  "expo": {
+    "name": "Bugsha ops",
+    "slug": "bugsha-ops",
+    "scheme": "bugsha-ops",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "org.bugsha.ops",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "org.bugsha.ops"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "platforms": [
+      "web"
+    ],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sqlite",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png"
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}

@@ -382,3 +382,16 @@ s3_region = "env(S3_REGION)"
 s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
+
+[auth.email]
+enable_confirmations = true
+otp_length = 6
+otp_expiry = 600
+
+[auth.email.template.magic_link]
+subject = "Your Bugsha code: {{ .Token }}"
+content_path = "./supabase/templates/otp-code.html"
+
+[auth.email.template.confirmation]
+subject = "Your Bugsha code: {{ .Token }}"
+content_path = "./supabase/templates/otp-code.html"

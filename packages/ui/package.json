@@ -14,13 +14,25 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-safe-area-context": "*"
+    "react-native-safe-area-context": "*",
+    "react-native-svg": "*",
+    "lucide-react-native": "*",
+    "expo-font": "*",
+    "@expo-google-fonts/archivo": "*",
+    "@expo-google-fonts/alexandria": "*",
+    "@expo-google-fonts/ibm-plex-mono": "*"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
     "@types/react": "^18.3.11",
     "react-native": "0.76.9",
     "react": "18.3.1",
-    "react-native-safe-area-context": "4.12.0"
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-svg": "15.8.0",
+    "lucide-react-native": "^1.43.0",
+    "expo-font": "~13.0.4",
+    "@expo-google-fonts/archivo": "^0.4.2",
+    "@expo-google-fonts/alexandria": "^0.4.2",
+    "@expo-google-fonts/ibm-plex-mono": "^0.4.1"
   }
 }

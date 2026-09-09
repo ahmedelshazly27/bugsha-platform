@@ -1,29 +1,31 @@
-// S-C-020 — browse. Designed Arabic-first; urgency is real information only.
-import { FlatList, Text, RefreshControl } from 'react-native';
-import { router } from 'expo-router';
+// S-C-020 — Browse. Sections are time-shaped; scarcity is only ever real (minutes left, bags left, distance).
+import { useMemo, useState } from 'react'; import { router } from 'expo-router'; import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useBrowse } from '@bugsha/api';
-import { formatMoney, money, type Currency } from '@bugsha/core';
-import { t, formatWindow } from '@bugsha/i18n';
-import { Screen, BagCard, Empty } from '@bugsha/ui';
-import { db } from '../../src/lib/supabase';
-import { useSession } from '../../src/lib/session';
-
+import { BagCard, BrandBar, Chip, EmptyState, Icon, IconButton, Logo, Num, SecHead, Skeleton, T, color, radius, space } from '@bugsha/ui';
+import { db } from '../../src/lib/supabase'; import { useSession } from '../../src/lib/session'; import { bagTitle, cdFmt, hhmm, leftFmt, major, minutesLeft, useL, CUR } from '../../src/lib/ui';
+const CATS = [['now', 'Collect now', 'استلام الآن', 'clock'], ['bakery', 'Bakery', 'مخبوزات', null], ['meals', 'Meals', 'وجبات', null], ['grocery', 'Groceries', 'بقالة', null], ['sweets', 'Desserts', 'حلويات', null], ['cafe', 'Café', 'كافيه', null]] as const;
 export default function Browse() {
-  const { market, cityId, locale, numerals } = useSession();
-  const q = useBrowse(db, market, cityId);
-  const rows = (q.data ?? []) as Array<Record<string, any>>;
-  return (
-    <Screen title={t('browse.header.title', locale)}>
-      <FlatList data={rows} keyExtractor={(r) => r.listing_id} refreshControl={<RefreshControl refreshing={q.isFetching} onRefresh={() => q.refetch()} />}
-        ListEmptyComponent={<Empty title={t('browse.empty.title', locale)} />}
-        renderItem={({ item }) => (
-          <BagCard title={item.title_snapshot} store={item.display_name}
-            price={formatMoney(money(item.price_minor, item.currency as Currency), locale, numerals)}
-            value={formatMoney(money(item.value_min_minor, item.currency as Currency), locale, numerals)}
-            left={item.quantity_remaining} leftLabel={t('bag.left', locale, { count: item.quantity_remaining })}
-            window={formatWindow(new Date(item.window_start_utc), new Date(item.window_end_utc), { locale, market })}
-            onPress={() => router.push(`/listing/${item.listing_id}`)} />
-        )} />
-    </Screen>
-  );
+  const { market, cityId, cityName } = useSession(); const { L, ar, lang } = useL(); const q = useBrowse(db, market, cityId); const [cat, setCat] = useState<string | null>(null);
+  const rows = useMemo(() => ((q.data ?? []) as any[]).map((r) => ({ id: r.listing_id as string, partner: r.display_name as string, title: bagTitle(r.category, ar), category: r.category as string, now: major(r.price_minor, market), was: r.value_min_minor ? major(r.value_min_minor, market) : null, from: hhmm(r.local_start), to: hhmm(r.local_end), left: r.quantity_remaining as number, rating: Number(r.rating) || null, count: r.rating_count as number, mins: minutesLeft(r.window_end_utc), tags: (r.dietary_flags ?? []) as string[] })), [q.data, ar, market]);
+  const pool = rows.filter((r) => !cat || cat === 'now' ? true : r.category === cat).filter((r) => cat !== 'now' || r.mins <= 60);
+  const soon = pool.filter((r) => r.mins <= 60), rest = pool.filter((r) => r.mins > 60);
+  const card = (r: (typeof rows)[number], layout: 'card' | 'row' = 'row') => <BagCard key={r.id} layout={layout} partner={r.partner} title={r.title} category={r.category} priceNow={r.now} priceWas={r.was} currency={CUR[market].code} decimals={CUR[market].dp} from={r.from} to={r.to} bagsLeft={r.left} leftFormat={leftFmt(ar)} rating={r.rating} ratingCount={r.count} tags={r.tags} minutesLeft={r.mins <= 60 ? r.mins : null} countdownFormat={cdFmt(ar)} onPress={() => router.push(`/listing/${r.id}`)} />;
+  return <View style={{ flex: 1, backgroundColor: color.canvas }}>
+    <BrandBar>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}><Logo lockup="horizontal" lang={lang} size={20} color="#fff" fold={color.brandSurface} foldOpacity={1} /><View style={{ flex: 1 }} /><IconButton icon="bell" label={L('Notifications', 'الإشعارات')} color="#fff" /></View>
+      <Pressable onPress={() => router.push('/onboarding/city')} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}><Icon name="map-pin" size={15} color="rgba(255,255,255,.92)" /><T role="label" weight={600} color="rgba(255,255,255,.92)">{cityName || L('Choose area', 'اختر المنطقة')}</T><Icon name="chevron-down" size={14} color="rgba(255,255,255,.92)" /></Pressable>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Pressable onPress={() => router.push('/search')} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,.16)', borderRadius: radius.control, paddingVertical: 9, paddingHorizontal: 12 }}><Icon name="search" size={16} color="rgba(255,255,255,.8)" /><T role="label" color="rgba(255,255,255,.8)">{L('Search stores or food', 'ابحث عن متجر أو طعام')}</T></Pressable>
+        <IconButton icon="funnel" label={L('Filters', 'التصفية')} size={40} color="#fff" bg="rgba(255,255,255,.16)" /></View>
+    </BrandBar>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 2 }} style={{ flexGrow: 0 }}>
+      {CATS.map(([k, en, a, icon]) => <Chip key={k} selected={cat === k} icon={icon ?? undefined} onPress={() => setCat(cat === k ? null : k)}>{L(en, a)}</Chip>)}</ScrollView>
+    <ScrollView contentContainerStyle={{ padding: 14, paddingTop: 8, gap: 14 }} refreshControl={<RefreshControl refreshing={q.isFetching && !q.isLoading} onRefresh={() => q.refetch()} />}>
+      {q.isLoading ? <View style={{ gap: 12 }}><Skeleton height={16} width="52%" />{[0, 1].map((i) => <View key={i} style={{ borderRadius: radius.card, overflow: 'hidden', borderWidth: 1, borderColor: color.borderSubtle, backgroundColor: color.raised }}><Skeleton height={132} radius={0} /><View style={{ padding: 12, gap: 8 }}><Skeleton height={15} width="62%" /><Skeleton height={12} width="40%" /><Skeleton height={18} width="34%" /></View></View>)}</View>
+        : pool.length === 0 ? <EmptyState icon="moon" title={L("Tonight's bags are gone", 'بقش الليلة انتهت')} body={L('Stores list at closing time — most appear between 20:00 and 22:00. Pull down later to check again.', 'المتاجر تعرض عند الإغلاق — أغلبها بين 20:00 و22:00. اسحب للأسفل لاحقاً للتحديث.')} actionLabel={L('Refresh', 'تحديث')} onAction={() => q.refetch()} />
+        : <>
+          {soon.length ? <><SecHead title={L('Collect within the hour', 'استلام خلال ساعة')} right={<View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}><Icon name="clock" size={12} color={color.textSecondary} /><Num role="caption" color={color.textSecondary}>{market === 'KW' ? 'AST' : 'EET'}</Num></View>} />{soon.map((r, i) => card(r, i === 0 ? 'card' : 'row'))}</> : null}
+          {rest.length ? <><SecHead title={L('Best value tonight', 'أفضل قيمة الليلة')} right={<Num role="caption" color={color.textSecondary}>{`${rest.length}`}</Num>} />{rest.map((r, i) => card(r, !soon.length && i === 0 ? 'card' : 'row'))}</> : null}
+        </>}
+      <View style={{ height: space[300] }} /></ScrollView></View>;
 }

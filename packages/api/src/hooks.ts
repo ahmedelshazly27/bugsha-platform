@@ -39,7 +39,7 @@ export const useSearch = (db: Bugsha, market: string, query: string, city: strin
 });
 export const useListing = (db: Bugsha, id: string) => useQuery({ queryKey: keys.listing(id), queryFn: () => rpc(db, 'listing_detail', { p_listing_id: id }) });
 export const useOrder = (db: Bugsha, id: string) => useQuery({ queryKey: keys.order(id), queryFn: () => rpc(db, 'order_detail', { p_order: id }) });
-export const useMyOrders = (db: Bugsha) => useQuery({ queryKey: keys.myOrders(), queryFn: async () => { const { data, error } = await db.from('order').select('*').order('created_at', { ascending: false }); if (error) throw error; return data; } });
+export const useMyOrders = (db: Bugsha, enabled = true) => useQuery({ queryKey: keys.myOrders(), enabled, queryFn: async () => { const { data, error } = await db.from('order').select('*').order('created_at', { ascending: false }); if (error) throw error; return data; } });
 export const useImpact = (db: Bugsha) => useQuery({ queryKey: keys.impact(), queryFn: () => rpc(db, 'my_impact') });
 export const useWallet = (db: Bugsha) => useQuery({ queryKey: keys.wallet(), queryFn: () => rpc(db, 'wallet_balance') });
 
