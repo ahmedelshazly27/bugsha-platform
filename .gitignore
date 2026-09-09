@@ -19,3 +19,6 @@ supabase/.branches/
 # Expo prebuild output (continuous native generation)
 ios/
 android/
+
+# The ops console build on Vercel needs these; both values are public (project URL + publishable key).
+!apps/ops/.env.production
