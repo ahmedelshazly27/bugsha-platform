@@ -76,3 +76,6 @@ Confirming a payout that does not exist, or is not in `executing`, raises `BG100
 
 ## D22 — Client offline store is expo-sqlite behind `@bugsha/offline`'s interface
 `@bugsha/offline` stays pure TypeScript (tested with an in-memory store). `apps/partner/src/offline/store.ts` is the SQLite implementation. Codes are hashed with SHA-256 on device so the mirror never holds a redemption code in plain text.
+
+## D23 — Sign-in is by email code, not SMS (2026-09-09)
+The founder chose email sign-in to avoid an SMS provider for now. Supabase email OTP is used in both apps. The verified identity is the JWT's confirmed email; `consumer_profile.phone` is now an optional contact number the user types, still validated for the market so the store can call about a late pickup. `resend-otp` takes an email. The spec sections that say "phone is identity" (00-product, 07-api) are superseded by this decision. Production needs custom SMTP in Supabase Auth; the built-in mailer is rate-limited to a few messages an hour.

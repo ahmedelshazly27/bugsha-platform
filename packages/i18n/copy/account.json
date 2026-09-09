@@ -1,5 +1,6 @@
 { "_note": "S-C-050 … S-C-058. Authored per register.",
-  "auth.phone": { "en": "Phone number", "ar-KW": "رقم الهاتف", "ar-EG": "رقم الموبايل" },
+  "auth.email": { "en": "Email", "ar-KW": "البريد الإلكتروني", "ar-EG": "الإيميل" },
+  "auth.phone": { "en": "Phone number (for the store to reach you)", "ar-KW": "رقم الهاتف (ليتواصل معك المتجر)", "ar-EG": "رقم الموبايل (عشان المحل يكلمك)" },
   "auth.send_code": { "en": "Send code", "ar-KW": "أرسل الرمز", "ar-EG": "ابعت الكود" },
   "auth.code": { "en": "Code", "ar-KW": "الرمز", "ar-EG": "الكود" },
   "auth.verify": { "en": "Continue", "ar-KW": "متابعة", "ar-EG": "كمّل" },

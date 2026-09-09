@@ -5,27 +5,27 @@
 begin;
 select plan(30);
 
--- ─── Phase 2: a consumer signs in by phone, in BOTH markets ────────────────
-insert into auth.users (instance_id, id, aud, role, phone, phone_confirmed_at, created_at, updated_at)
+-- ─── Phase 2: a consumer signs in by email (D23), in BOTH markets ──────────
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at)
 values ('00000000-0000-0000-0000-000000000000','cccccccc-0000-4000-8000-0000000000f1',
-        'authenticated','authenticated','+96555555555', now(), now(), now()),
+        'authenticated','authenticated','Noura@Example.kw', now(), now(), now()),
        ('00000000-0000-0000-0000-000000000000','cccccccc-0000-4000-8000-0000000000f2',
-        'authenticated','authenticated','+201555555555', now(), now(), now())
-on conflict (id) do nothing;
+        'authenticated','authenticated','mariam@example.eg', now(), now(), now())
+on conflict (id) do update set email = excluded.email, email_confirmed_at = now();
 
 select tests.authenticate_as('cccccccc-0000-4000-8000-0000000000f1');
 select lives_ok($$ select app.complete_profile('Noura','KW','11111111-0000-4000-8000-000000000002') $$,
   'P2-1: a Kuwaiti consumer completes a profile with only a first name');
 select is((select market::text from consumer_profile where user_id='cccccccc-0000-4000-8000-0000000000f1'),
   'KW', 'P2-2: and lands in the Kuwait market');
-select is((select phone from consumer_profile where user_id='cccccccc-0000-4000-8000-0000000000f1'),
-  '+96555555555', 'P2-3: the phone comes from the verified JWT, never the caller');
+select is((select email from consumer_profile where user_id='cccccccc-0000-4000-8000-0000000000f1'),
+  'noura@example.kw', 'P2-3: the email comes from the verified JWT (lower-cased), never the caller');
 select is((select locale::text from app_user where id='cccccccc-0000-4000-8000-0000000000f1'),
   'ar-KW', 'P2-4: locale defaults to the market default, Gulf Arabic');
 select throws_ok($$ select app.complete_profile('','KW','11111111-0000-4000-8000-000000000002') $$,
   'BG102', null, 'P2-5: a blank first name is refused');
-select throws_ok($$ select app.complete_profile('Noura','EG','11111111-0000-4000-8000-000000000007') $$,
-  'BG102', null, 'P2-6: a +965 number cannot claim an Egyptian profile');
+select throws_ok($$ select app.complete_profile('Noura','KW','11111111-0000-4000-8000-000000000002', null, null, null, '+201555555555') $$,
+  'BG102', null, 'P2-6: an Egyptian contact number is refused on a Kuwaiti profile');
 select throws_ok($$ select app.complete_profile('Noura','KW','11111111-0000-4000-8000-00000000000a') $$,
   'BG119', null, 'P2-7: a waitlist city is refused, not silently accepted');
 
