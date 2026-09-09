@@ -24,10 +24,10 @@ export function PartnerStat({ label, value, sub, icon, tone = 'neutral', style }
     {sub ? <Num role="micro" color={C.textTertiary}>{sub}</Num> : null}</View>;
 }
 /** Weekly payout summary — the number a finance lead checks first. */
-export function PayoutCard({ amount, currency = 'KD', decimals = 3, period, note }: { amount: number; currency?: string; decimals?: number; period: string; note?: string }) {
-  return <View style={{ gap: space[150], padding: space[300], backgroundColor: C.raised, borderRadius: radius.card, borderWidth: 1, borderColor: C.borderSubtle, ...shadow.card }}>
+export function PayoutCard({ amount, currency = 'KD', decimals = 3, period, note, onPress }: { amount: number; currency?: string; decimals?: number; period: string; note?: string; onPress?: () => void }) {
+  return <Pressable disabled={!onPress} onPress={onPress} style={{ gap: space[150], padding: space[300], backgroundColor: C.raised, borderRadius: radius.card, borderWidth: 1, borderColor: C.borderSubtle, ...shadow.card }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Icon name="banknote" size={18} color={C.textSecondary} /><Label color={C.textSecondary}>{period}</Label></View>
-    <Num role="display" weight={700} style={{ lineHeight: 36 }}>{`${amount.toFixed(decimals)} ${currency}`}</Num>{note ? <Num role="caption" color={C.textSecondary}>{note}</Num> : null}</View>;
+    <Num role="display" weight={700} style={{ lineHeight: 36 }}>{`${amount.toFixed(decimals)} ${currency}`}</Num>{note ? <Num role="caption" color={C.textSecondary}>{note}</Num> : null}</Pressable>;
 }
 /** One line of the regulator-facing compliance ledger. */
 export function LedgerRow({ orderId, listedAt, windowEnd, collectedAt, attested, head }: { orderId: string; listedAt: string; windowEnd: string; collectedAt?: string | null; attested?: boolean; head?: boolean }) {

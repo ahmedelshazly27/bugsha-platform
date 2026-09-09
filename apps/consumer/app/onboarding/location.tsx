@@ -1,0 +1,7 @@
+// S-C-007 — location primer before the OS prompt. The app works either way.
+import { router } from 'expo-router'; import { View } from 'react-native'; import * as Location from 'expo-location';
+import { Button, Foot, Icon, Pp, Screen, T, color } from '@bugsha/ui'; import { useSession } from '../../src/lib/session'; import { useL } from '../../src/lib/ui';
+export default function Loc() { const { L } = useL(); const set = useSession((s) => s.set);
+  return <View style={{ flex: 1 }}><Screen scroll={false} pad={20} gap={16} style={{ justifyContent: 'center' }}><Icon name="navigation" size={34} color={color.brand} />
+    <View style={{ gap: 6 }}><T role="titleLg" weight={700}>{L("See what's close, not just what's listed", 'شاهد ما هو قريب منك')}</T><Pp>{L("With location on, bags are sorted by how far you'd actually drive. Without it, you pick an area by hand — the app works either way.", 'مع تفعيل الموقع، تُرتّب البقش حسب المسافة الفعلية. بدونه تختار المنطقة يدوياً — التطبيق يعمل في الحالتين.')}</Pp></View></Screen>
+    <Foot><Button size="lg" fullWidth onPress={async () => { const r = await Location.requestForegroundPermissionsAsync(); if (r.granted) { const p = await Location.getCurrentPositionAsync({}); set({ lat: p.coords.latitude, lng: p.coords.longitude }); } router.back(); }}>{L('Use my location', 'استخدام موقعي')}</Button><Button variant="ghost" fullWidth onPress={() => router.back()}>{L('Not now — pick an area', 'ليس الآن — سأختار المنطقة')}</Button></Foot></View>; }

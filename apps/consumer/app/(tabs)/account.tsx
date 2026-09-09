@@ -7,11 +7,19 @@ export default function Account() {
   const s = useSession(); const { L, ar } = useL(); const wallet = useWallet(db) as any;
   const initial = (ar ? 'ب' : 'B');
   const rows: Array<[string, string, string, (() => void) | undefined, React.ReactNode?]> = [
-    ['wallet', 'Wallet & credit', 'المحفظة والرصيد', undefined, wallet.data ? <Num role="label" color={color.textSecondary}>{money(wallet.data.balance_minor ?? 0, s.market)}</Num> : undefined],
+    ['user', 'Profile', 'الملف الشخصي', () => router.push('/account/profile')],
+    ['wallet', 'Wallet & credit', 'المحفظة والرصيد', () => router.push('/account/wallet'), wallet.data ? <Num role="label" color={color.textSecondary}>{money(wallet.data.balance_minor ?? 0, s.market)}</Num> : undefined],
+    ['bell', 'Notifications', 'الإشعارات', () => router.push('/account/notifications')],
     ['map-pin', 'Market & city', 'السوق والمدينة', () => router.push('/onboarding/market'), <Caption>{s.cityName}</Caption>],
+    ['utensils', 'Dietary preferences', 'التفضيلات الغذائية', () => router.push('/account/dietary')],
+    ['heart', 'Saved stores', 'المتاجر المحفوظة', () => router.navigate('/(tabs)/saved')],
     ['receipt', 'Order history', 'سجل الطلبات', () => router.navigate('/(tabs)/orders')],
     ['leaf', 'Your impact', 'أثرك', () => router.push('/account/impact')],
-    ['info', 'Help', 'المساعدة', undefined], ['file-text', 'Legal', 'الوثائق القانونية', undefined],
+    ['share-2', 'Invite a friend', 'ادعُ صديقاً', () => router.push('/account/invite')],
+    ['info', 'Help', 'المساعدة', () => router.push('/account/help')],
+    ['leaf', 'Food safety', 'سلامة الغذاء', () => router.push('/account/safety')],
+    ['file-text', 'Legal', 'الوثائق القانونية', () => router.push('/account/legal')],
+    ['trash-2', 'Delete account', 'حذف الحساب', () => router.push('/account/delete')],
   ];
   return <View style={{ flex: 1 }}><AppBar title={L('Account', 'حسابي')} back={false} />
     <Screen top={false} pad={0} gap={0}>

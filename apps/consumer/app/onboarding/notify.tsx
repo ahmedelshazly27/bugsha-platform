@@ -1,0 +1,11 @@
+// S-C-008 — deferred notification primer: asked after the first reservation, categories previewed as real toggles.
+import { useState } from 'react'; import { router } from 'expo-router'; import { Platform, View } from 'react-native'; import * as Notifications from 'expo-notifications';
+import { useRegisterDevice, useSetNotificationPrefs } from '@bugsha/api';
+import { Button, Card, Foot, Icon, ListRow, Pp, Screen, Switch, T, color } from '@bugsha/ui'; import { db } from '../../src/lib/supabase'; import { useL } from '../../src/lib/ui';
+export default function Notify() { const { L } = useL(); const reg = useRegisterDevice(db); const prefs = useSetNotificationPrefs(db);
+  const [c, setC] = useState({ pickup_reminder: true, order_updates: true, saved_stores: false, nearby: false });
+  const rows: Array<[keyof typeof c, string, string, string]> = [['pickup_reminder', 'clock', 'Pickup reminders', 'تذكير الاستلام'], ['order_updates', 'receipt', 'Order updates', 'تحديثات الطلب'], ['saved_stores', 'heart', 'New bags from saved stores', 'بقش جديدة من متاجرك'], ['nearby', 'package', 'Nearby deals', 'عروض قريبة']];
+  return <View style={{ flex: 1 }}><Screen pad={18} gap={14} style={{ paddingTop: 70 }}><Icon name="bell" size={30} color={color.brand} />
+    <View style={{ gap: 6 }}><T role="titleLg" weight={700}>{L('One reminder before you collect', 'تذكير واحد قبل الاستلام')}</T><Pp>{L("Choose what we're allowed to send.", 'اختر ما يُسمح لنا بإرساله.')}</Pp></View>
+    <Card padded={false}>{rows.map(([k, icon, en, a]) => <ListRow key={k} icon={icon} label={L(en, a)} value={<Switch checked={c[k]} onChange={(v) => setC({ ...c, [k]: v })} label={L(en, a)} />} />)}</Card></Screen>
+    <Foot><Button size="lg" fullWidth onPress={async () => { await prefs.mutateAsync({ categories: c, quietFrom: '00:30', quietTo: '09:00' }).catch(() => {}); const p = await Notifications.requestPermissionsAsync(); if (p.granted) { try { const t = await Notifications.getExpoPushTokenAsync(); await reg.mutateAsync({ token: t.data, platform: Platform.OS }); } catch {} } router.back(); }}>{L('Allow notifications', 'السماح بالإشعارات')}</Button><Button variant="ghost" fullWidth onPress={() => router.back()}>{L('Not now', 'ليس الآن')}</Button></Foot></View>; }

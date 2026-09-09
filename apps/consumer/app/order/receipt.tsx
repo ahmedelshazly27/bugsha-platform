@@ -1,0 +1,11 @@
+// S-C-051 — itemised receipt.
+import { router, useLocalSearchParams } from 'expo-router'; import { Share, View } from 'react-native';
+import { useOrder } from '@bugsha/api'; import { AppBar, Button, Caption, Card, IconButton, Line, Num, Rule, Screen, T } from '@bugsha/ui';
+import { db } from '../../src/lib/supabase'; import { useSession } from '../../src/lib/session'; import { money, useL } from '../../src/lib/ui';
+export default function Receipt() { const { id } = useLocalSearchParams<{ id: string }>(); const { market } = useSession(); const { L } = useL(); const q = useOrder(db, id!); const d = q.data as any; if (!d) return <Screen><Caption>…</Caption></Screen>; const o = d.order;
+  const text = `${d.store.display_name} · ${o.code} · ${money(o.total_minor, market)}`;
+  return <View style={{ flex: 1 }}><AppBar title={L('Receipt', 'الإيصال')} onBack={() => router.back()} action={<IconButton icon="share-2" label={L('Share', 'مشاركة')} onPress={() => Share.share({ message: text })} />} /><Screen top={false} pad={16} gap={12}>
+    <View style={{ gap: 4 }}><T role="headline" weight={700}>{d.store.display_name}</T><View style={{ flexDirection: 'row', gap: 4 }}><Caption>{L('Order', 'الطلب')}</Caption><Num role="caption" color="#6B6579">{o.code}</Num><Caption>·</Caption><Num role="caption" color="#6B6579">{String(o.created_at).slice(0, 10)}</Num></View></View>
+    <Card><View style={{ gap: 6 }}><Line k={`${o.title_snapshot} × ${o.quantity}`} v={<Num role="label">{money(o.subtotal_minor, market)}</Num>} />{o.discount_minor ? <Line k={L('Discount', 'خصم')} v={<Num role="label">{`−${money(o.discount_minor, market)}`}</Num>} /> : null}<Rule /><Line k={L('Total paid', 'الإجمالي المدفوع')} v={<Num weight={700}>{money(o.total_minor, market)}</Num>} strong /></View></Card>
+    <Card><View style={{ gap: 6 }}><Line k={L('Payment', 'الدفع')} v={String(o.method).toUpperCase()} /><Line k={L('Status', 'الحالة')} v={String(o.status).replace('_', ' ')} />{d.redemption ? <Line k={L('Collected at', 'وقت الاستلام')} v={<Num role="label">{String(d.redemption.server_ts).slice(11, 16)}</Num>} /> : null}</View></Card>
+    <Button variant="secondary" fullWidth iconStart="share-2" onPress={() => Share.share({ message: text })}>{L('Share', 'مشاركة')}</Button></Screen></View>; }

@@ -108,3 +108,39 @@ export function subscribeOrdersBoard(db: Bugsha, storeId: string, onChange: () =
 export const useOps = <T = unknown>(db: Bugsha, fn: string, args: Record<string, unknown> = {}, enabled = true) =>
   useQuery<T>({ queryKey: ['ops', fn, args], queryFn: () => rpc<T>(db, fn, args), enabled });
 export const useOpsMutation = (db: Bugsha, fn: string) => useMutation({ mutationFn: (args: Record<string, unknown>) => rpc(db, fn, args) });
+
+// ── Screens added 2026-09-09 (saved stores, prefs, profile; partner org) ──────
+export const useSavedStores = (db: Bugsha) => useQuery({ queryKey: ['saved_stores'], queryFn: () => rpc<any[]>(db, 'my_saved_stores') });
+export const useToggleSaved = (db: Bugsha) => useMutation({ mutationFn: (storeId: string) => rpc<boolean>(db, 'toggle_saved_store', { p_store: storeId }) });
+export const useSetSavedNotify = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; notify: boolean }) => rpc(db, 'set_saved_notify', { p_store: a.storeId, p_notify: a.notify }) });
+export const useNotificationPrefs = (db: Bugsha) => useQuery({ queryKey: ['notif_prefs'], queryFn: () => rpc<any>(db, 'my_notification_prefs') });
+export const useSetNotificationPrefs = (db: Bugsha) => useMutation({ mutationFn: (a: { categories: Record<string, boolean>; quietFrom?: string | null; quietTo?: string | null }) => rpc(db, 'set_notification_prefs', { p_categories: a.categories, p_quiet_from: a.quietFrom ?? null, p_quiet_to: a.quietTo ?? null }) });
+export const useProfile = (db: Bugsha, enabled = true) => useQuery({ queryKey: ['profile'], enabled, queryFn: () => rpc<any>(db, 'my_profile') });
+export const useUpdateProfile = (db: Bugsha) => useMutation({ mutationFn: (a: { firstName: string; lastName?: string; phone?: string }) => rpc(db, 'update_profile', { p_first_name: a.firstName, p_last_name: a.lastName ?? null, p_phone: a.phone ?? null }) });
+export const useSetDietary = (db: Bugsha) => useMutation({ mutationFn: (a: { flags: string[]; ack: boolean }) => rpc(db, 'set_dietary', { p_flags: a.flags, p_allergen_ack: a.ack }) });
+export const useRequestDeletion = (db: Bugsha) => useMutation({ mutationFn: () => rpc<any>(db, 'request_deletion') });
+export const useRegisterDevice = (db: Bugsha) => useMutation({ mutationFn: (a: { token: string; platform: string }) => rpc(db, 'register_device', { p_token: a.token, p_platform: a.platform }) });
+export const useStoreProfile = (db: Bugsha, storeId: string) => useQuery({ queryKey: ['store', storeId], queryFn: () => rpc<any>(db, 'store_profile', { p_store: storeId }) });
+export const useRequestRefund = (db: Bugsha) => useMutation({ mutationFn: (a: { orderId: string; amountMinor: number; destination: string; reasonCode: string }) => rpc(db, 'request_refund', { p_order: a.orderId, p_amount_minor: a.amountMinor, p_destination: a.destination, p_reason_code: a.reasonCode }) });
+export const usePartner = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['partner', partnerId], enabled: !!partnerId, queryFn: () => rpc<any>(db, 'my_partner', { p_partner: partnerId }) });
+export const useUpsertTemplate = (db: Bugsha) => useMutation({ mutationFn: (a: Record<string, unknown>) => rpc(db, 'upsert_bag_template', a) });
+export const useArchiveTemplate = (db: Bugsha) => useMutation({ mutationFn: (id: string) => rpc(db, 'archive_template', { p_template_id: id }) });
+export const useStaff = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['staff', partnerId], enabled: !!partnerId, queryFn: () => rpc<any[]>(db, 'my_staff', { p_partner: partnerId }) });
+export const useInviteStaff = (db: Bugsha) => useMutation({ mutationFn: (a: { email: string; partnerId: string; storeId: string | null; role: string; name?: string }) => rpc(db, 'invite_staff_by_email', { p_email: a.email, p_partner: a.partnerId, p_store: a.storeId, p_role: a.role, p_full_name: a.name ?? null }) });
+export const useRevokeStaff = (db: Bugsha) => useMutation({ mutationFn: (assignmentId: string) => rpc(db, 'revoke_staff', { p_assignment: assignmentId }) });
+export const useReviews = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['reviews', partnerId], enabled: !!partnerId, queryFn: () => rpc<any[]>(db, 'my_reviews', { p_partner: partnerId }) });
+export const useRespondReview = (db: Bugsha) => useMutation({ mutationFn: (a: { reviewId: string; body: string }) => rpc(db, 'respond_to_review', { p_review: a.reviewId, p_body: a.body }) });
+export const useDocuments = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['documents', partnerId], enabled: !!partnerId, queryFn: () => rpc<any[]>(db, 'my_documents', { p_partner: partnerId }) });
+export const useUploadDocument = (db: Bugsha) => useMutation({ mutationFn: (a: { partnerId: string; docType: string; storagePath: string; storeId?: string | null; expiresOn?: string | null }) => rpc(db, 'upload_document', { p_partner: a.partnerId, p_doc_type: a.docType, p_storage_path: a.storagePath, p_store_id: a.storeId ?? null, p_expires_on: a.expiresOn ?? null }) });
+export const useAcceptContract = (db: Bugsha) => useMutation({ mutationFn: (a: { contractId: string; hash: string }) => rpc(db, 'accept_contract', { p_contract: a.contractId, p_ip: '0.0.0.0', p_ua: 'BugshaPartner/mobile', p_document_hash: a.hash }) });
+export const useSubmitApplication = (db: Bugsha) => useMutation({ mutationFn: (a: Record<string, unknown>) => rpc<any>(db, 'submit_application', a) });
+export const useUpsertStore = (db: Bugsha) => useMutation({ mutationFn: (a: Record<string, unknown>) => rpc<any>(db, 'upsert_store', a) });
+export const useSetHours = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; rows: unknown[]; ramadan?: boolean }) => rpc(db, 'set_hours', { p_store: a.storeId, p_rows: a.rows, p_is_ramadan: a.ramadan ?? false }) });
+export const useReliability = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['reliability', partnerId], enabled: !!partnerId, queryFn: () => rpc<any>(db, 'reliability', { p_partner: partnerId }) });
+export const useInsights = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['insights', partnerId], enabled: !!partnerId, queryFn: () => rpc<any>(db, 'analytics_insights', { p_partner: partnerId }) });
+export const useComplianceLedger = (db: Bugsha, storeId: string, from: string, to: string) => useQuery({ queryKey: ['ledger', storeId, from, to], enabled: !!storeId, queryFn: () => rpc<any[]>(db, 'compliance_ledger', { p_store: storeId, p_from: from, p_to: to }) });
+export const useSubmitCashRecon = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; date: string; reportedMinor: number; note?: string }) => rpc(db, 'submit_cash_reconciliation', { p_store: a.storeId, p_date: a.date, p_reported_minor: a.reportedMinor, p_note: a.note ?? null }) });
+export const useUpsertSchedule = (db: Bugsha) => useMutation({ mutationFn: (a: Record<string, unknown>) => rpc(db, 'upsert_schedule', a) });
+export const useSchedules = (db: Bugsha, storeId: string) => useQuery({ queryKey: ['schedules', storeId], enabled: !!storeId, queryFn: () => rpc<any[]>(db, 'schedules', { p_store: storeId }) });
+export const usePauseSchedule = (db: Bugsha) => useMutation({ mutationFn: (id: string) => rpc(db, 'pause_schedule', { p_schedule: id }) });
+export const usePauseStore = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; reason: string; until: string }) => rpc(db, 'pause_store', { p_store: a.storeId, p_reason_code: a.reason, p_until: a.until }) });

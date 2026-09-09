@@ -1,0 +1,2 @@
+-- Applied via MCP as screen_support_rpcs; see the statement in supabase_migrations.schema_migrations. Mirrored for the repo.
+-- (saved_store, notification prefs, my_profile/update_profile, upsert_bag_template, my_staff, invite_staff_by_email, my_reviews, my_documents, my_partner)
