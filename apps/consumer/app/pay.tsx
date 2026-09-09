@@ -2,12 +2,12 @@
 // touches a PSP. Ambiguous return: NO retry control, hold extended, poll (06-payments.md).
 import { Text } from 'react-native'; import { useLocalSearchParams } from 'expo-router';
 import { Screen, Notice, Button } from '@bugsha/ui'; import { db } from '../src/lib/supabase'; import { useSession } from '../src/lib/session';
-import { t } from '@bugsha/i18n'; import { useState } from 'react';
+import { t } from '@bugsha/i18n'; import { useState } from 'react'; import { newIdempotencyKey } from '@bugsha/api';
 export default function Pay() {
   const { order } = useLocalSearchParams<{ order: string }>(); const { locale } = useSession(); const [state, setState] = useState<'idle' | 'processing' | 'ambiguous' | 'failed'>('idle');
   async function start() {
     setState('processing');
-    const { data, error } = await db.functions.invoke('create-payment', { body: { orderId: order }, headers: { 'idempotency-key': crypto.randomUUID() } });
+    const { data, error } = await db.functions.invoke('create-payment', { body: { orderId: order }, headers: { 'idempotency-key': newIdempotencyKey() } });
     if (error) { setState(error.message?.includes('BG140') ? 'ambiguous' : 'failed'); return; }
     if (data?.redirectUrl) (globalThis as any).open?.(data.redirectUrl);
   }
