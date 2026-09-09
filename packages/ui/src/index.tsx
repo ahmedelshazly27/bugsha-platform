@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { View, Text, Pressable, TextInput, ScrollView, I18nManager, type TextInputProps } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from './theme';
 export { theme } from './theme';
 
@@ -8,7 +9,9 @@ const T = ({ children, size = 16, weight = '400', color = theme.ink, mono = fals
   <Text {...p} style={[{ fontSize: size, fontWeight: weight, color, lineHeight: theme.lineHeight(size, rtl()), fontFamily: mono ? theme.mono : undefined, textAlign: rtl() ? 'right' : 'left', writingDirection: rtl() ? 'rtl' : 'ltr' }, style]}>{children}</Text>;
 
 export function Screen({ title, children }: { title: string; children: ReactNode }) {
-  return <ScrollView style={{ flex: 1, backgroundColor: theme.paper }} contentContainerStyle={{ padding: theme.space(5), gap: theme.space(3) }}>
+  const insets = useSafeAreaInsets();
+  return <ScrollView style={{ flex: 1, backgroundColor: theme.paper }} keyboardShouldPersistTaps="handled"
+    contentContainerStyle={{ paddingTop: insets.top + theme.space(3), paddingBottom: insets.bottom + theme.space(5), paddingHorizontal: theme.space(5), gap: theme.space(3) }}>
     <T size={28} weight="700" accessibilityRole="header">{title}</T>{children}</ScrollView>;
 }
 export function Button({ children, onPress, tone = 'primary', disabled }: { children: ReactNode; onPress: () => void; tone?: 'primary' | 'ghost'; disabled?: boolean }) {

@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nManager } from 'react-native';
 import { useEffect } from 'react';
 import { isRtl } from '@bugsha/i18n';
@@ -17,5 +18,5 @@ export default function Root() {
     const { data: sub } = db.auth.onAuthStateChange((_e, s) => set({ userId: s?.user.id ?? null }));
     return () => sub.subscription.unsubscribe();
   }, [locale]);
-  return <QueryClientProvider client={qc}><Stack screenOptions={{ headerShown: false }} /></QueryClientProvider>;
+  return <SafeAreaProvider><QueryClientProvider client={qc}><Stack screenOptions={{ headerShown: false }} /></QueryClientProvider></SafeAreaProvider>;
 }
