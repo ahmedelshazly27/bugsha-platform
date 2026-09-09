@@ -12,8 +12,8 @@ export default function L() {
   const { userId } = useSession(); const store = useStore();
   const q = useMyStores(db, !!userId);
   useEffect(() => {
-    const rows = q.data ?? [];
-    if (rows.length === 1 && !store.storeId) store.set({ storeId: rows[0].store_id, partnerId: rows[0].partner_id, role: rows[0].role as any, storeName: rows[0].display_name });
+    const only = (q.data ?? [])[0];
+    if (q.data?.length === 1 && only && !store.storeId) store.set({ storeId: only.store_id, partnerId: only.partner_id, role: only.role as any, storeName: only.display_name });
   }, [q.data]);
   if (!userId) return <Redirect href="/signin" />;
   if (q.isLoading) return <Screen title="Bugsha Partner"><Text>…</Text></Screen>;
