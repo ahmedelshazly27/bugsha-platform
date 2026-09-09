@@ -118,3 +118,6 @@ Kuwait commercial and tax law requires accounting records for ten years. Egypt's
 
 ## D36 — Charity leg and insurance deferred
 No donation ledger account and no partner insurance clause at launch. Revisit before 50 stores.
+
+## D37 — The apps are built from the design system export, not from tokens alone (2026-09-09)
+`packages/ui` is a React Native port of `components/*` in the Claude Design export: Kerchief mark and live-type wordmark, Lucide icons at stroke 2, Archivo / Alexandria / IBM Plex Mono bundled via expo-font, the violet + ink token set, radii 10/8/6/16. Screens follow `ui_kits/consumer`, `ui_kits/partner-platform` and the ops desk chrome. Western digits everywhere, in both languages, per the identity section of the design README; the Arabic-Indic numeral setting is no longer exposed.
