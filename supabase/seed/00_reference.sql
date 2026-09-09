@@ -20,7 +20,7 @@ insert into market_config (
 ) values
   ('KW','KWD',3,'Asia/Kuwait',false,
    '{en,ar-KW}'::locale_code[],'ar-KW','western',
-   '{knet,apple_pay,card}'::payment_method[], false, 2200,
+   '{knet,apple_pay,card,cash}'::payment_method[], true, 2200,   -- cash enabled (D30)
    -- Kuwait: no VAT regime today. Decision 2 keeps the config, not a code path.
    false, null, null, 'platform_invoices_partner', 'PAFN',
    500, 15000, 0.50, 3, 2, 1, 10, 2, 30, 120, 'weekly', 0, 5000,
@@ -28,12 +28,15 @@ insert into market_config (
   ('EG','EGP',2,'Africa/Cairo',true,
    '{en,ar-EG}'::locale_code[],'ar-EG','western',
    '{card,wallet,instapay,fawry,cash}'::payment_method[], true, 2200,
-   -- Egypt operates a VAT regime, so vat_applies is TRUE, but the rate, base and
-   -- invoicing mechanism are decision 1 and stay NULL. app.resolve_tax() must
-   -- raise BG150 on this row. Never default these to zero. See DECISION D6.
-   true, null, null, null, 'NFSA',
+   -- Egypt: 14% VAT on the platform commission, platform e-invoices partners (D24).
+   true, 1400, 'commission', 'platform_invoices_partner', 'NFSA',
    2500, 75000, 0.50, 3, 2, 1, 10, 2, 30, 120, 'weekly', 0, 25000,
    100000, 250000, 1000, 300000, 30);
+
+-- D30/D35: cash thresholds for Kuwait, deletion clock and retention per market.
+update market_config set cash_variance_threshold_minor = 500, cash_liability_escalate_minor = 100000, cash_liability_escalate_days = 30,
+  deletion_clock_days = 30, financial_retention_years = 10, vat_effective_from = null where market = 'KW';
+update market_config set deletion_clock_days = 30, financial_retention_years = 5, vat_effective_from = current_date where market = 'EG';
 
 -- ─── Cities ─────────────────────────────────────────────────────────────────
 insert into city (id, market, name_en, name_ar, governorate, stage, centroid, default_radius_m) values

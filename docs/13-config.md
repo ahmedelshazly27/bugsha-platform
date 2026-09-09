@@ -13,13 +13,13 @@ Seed `market_config` with these. Values marked `TODO` must stay null and make th
 | `locales` | `{en, ar-KW}` | `{en, ar-EG}` |
 | `default_locale` | `ar-KW` | `ar-EG` |
 | `numerals_default` | `western` | `western` |
-| `payment_methods` | `{knet, apple_pay, card}` | `{card, wallet, instapay, fawry, cash}` |
-| `cash_enabled` | **false** | **true** |
+| `payment_methods` | `{knet, apple_pay, card, cash}` | `{card, wallet, instapay, fawry, cash}` |
+| `cash_enabled` | **true** (D30) | **true** |
 | `default_commission_bp` | `2200` `TODO(confirm)` | `2200` `TODO(confirm)` |
 | `vat_applies` | `false` | `true` |
-| `vat_bp` | `null` | **`TODO(decision 1)`** |
-| `vat_base` | `null` | **`TODO(decision 1)`** |
-| `invoicing_mode` | `platform_invoices_partner` | **`TODO(decision 1)`** |
+| `vat_bp` | `null` | `1400` |
+| `vat_base` | `null` | `commission` |
+| `invoicing_mode` | `platform_invoices_partner` | `platform_invoices_partner` |
 | `regulator_name` | `PAFN` | `NFSA` |
 | `price_min_minor` / `price_max_minor` | `500` / `15000` | `2500` / `75000` |
 | `max_price_fraction` | `0.50` | `0.50` |
@@ -96,20 +96,20 @@ These are also surfaced in the ops console (`§10` frame) with owners and dates,
 
 | # | Decision | Blocks | Owner | Interim behaviour |
 |---|---|---|---|---|
-| 1 | **Egypt VAT** on commission: rate, base, invoicing mechanism, e-invoicing registration | `05-money.md §4`, statements, `app.resolve_tax` | Finance + counsel | `vat_bp = null`; `resolve_tax` raises `BG150`. Egypt cannot go live on payouts until set |
-| 2 | **Kuwait tax position** — build now or configure later | `05-money.md §4` | Finance | `vat_applies = false`. Config exists; no code path assumes zero forever |
-| 3 | **Contracting legal entity per market**, and whether one entity can serve both | Contract records, statements, `partner` modelling | Founders + counsel | One `partner` row per market, enforced. Platform entity name is a config string, currently placeholder |
-| 4 | **Payment aggregator per market**, settlement timing, fee structure | `06-payments.md` | Finance | Both KW adapters built behind one interface; primary is a config row |
-| 5 | **PSP fees absorbed or passed to partners** | `05-money.md §3.5`, `psp_fee_bearer` | Founders | `psp_fee_bearer = 'platform'`, read from contract so a change is a new version |
-| 6 | **Chargeback liability allocation** | `05-money.md §3.9`, `chargeback_bearer` | Counsel | `chargeback_bearer = 'platform'`, read from contract |
-| 7 | **Cash commission settlement**: netting vs invoicing, and collections when netting is impossible | `05-money.md §3.3`, payout engine | Finance | `cash_settlement_mode = 'net'`; carry-forward and ageing built; invoice generation stubbed |
-| 8 | **Payout cadence and minimum per market** | Payout engine | Finance | Weekly Sunday; minimums as above. Config-driven, no code change to alter |
-| 9 | **No-show revenue policy** — partner retains, split, or refunded; and whether cash differs | `05-money.md §3.2`, `no_show_policy` | Founders | `partner_retains`, read from contract. Cash already writes no entries |
-| 10 | **Refund policy**: partner-cancelled vs consumer-cancelled, and PSP fee treatment on refunds | `06-payments.md §5` | Founders | Full refund both ways; PSP fee to `psp_fees` |
-| 11 | **Data residency and retention** per market, and the deletion statutory clock | `§6.6`, `§8.5`, `app.request_deletion` | Counsel | Retention: 7 y financial (KW), 5 y (EG) — **placeholders**. Deletion clock is a config integer, currently null and raises |
-| 12 | **Charity or donation leg** — does one exist, and its accounting treatment | Ledger accounts, impact metrics | Founders + counsel | `no_show_disposition = 'donated'` is captured for reporting only. **No ledger account exists yet** — deliberately |
-| 13 | **PAFN / NFSA platform registration**, and any rule on discounted resale of prepared food | `§5.2` register, trust copy | Compliance | Register and export built to the strictest reading of both |
-| 14 | **Insurance position** on food safety incidents; whether partners must carry cover as a contract term | Contract terms, `§5.2` | Founders + broker | Not a contract term today |
+| 1 | **Egypt VAT** on commission | **Decided 2026-09-09 (D24)** | 14% on the platform commission (`vat_bp = 1400`, `vat_base = commission`); platform issues ETA-compliant e-invoices to partners. Operational: register the Egyptian entity on the ETA e-invoicing portal |
+| 2 | **Kuwait tax position** | **Decided (D25)** | No VAT before 2028 per the government's four-year plan. `vat_applies = false`; config path stays ready |
+| 3 | **Contracting legal entity per market** | **Decided (D26)** | One local entity per market: a Kuwaiti company contracts Kuwaiti partners, an Egyptian company contracts Egyptian partners. Names are config strings, filled in at registration |
+| 4 | **Payment aggregator per market** | **Decided (D27)** | MyFatoorah primary in Kuwait (Tap secondary); Paymob in Egypt. Tap is not onboarding Egyptian merchants |
+| 5 | **PSP fees** | **Decided (D28)** | Platform absorbs (`psp_fee_bearer = platform`). Commission is priced to cover them; partner statements stay one line |
+| 6 | **Chargeback liability** | **Decided (D29)** | Platform bears by default (`chargeback_bearer = platform`); recovered from the partner only on evidenced non-fulfilment, via an adjustment with reason code |
+| 7 | **Cash commission settlement** | **Decided by founder 2026-09-09 (D30)** | **Invoiced** in both markets (`cash_settlement_mode = invoice`), never netted. Cash enabled in Kuwait too. Monthly invoice; ageing and escalation already built |
+| 8 | **Payout cadence and minimum** | **Confirmed (D31)** | Weekly, Sunday; minimums as above. Payout channel `manual` for now (D32) |
+| 9 | **No-show revenue** | **Confirmed (D33)** | Partner retains; cash writes no entries |
+| 10 | **Refund policy** | **Confirmed (D34)** | Full refund both ways; PSP fee on refunds is a platform cost |
+| 11 | **Data retention and deletion clock** | **Decided (D35)** | Financial records 10 y (KW, commercial law) / 5 y (EG, VAT regulations); deletion honoured within 30 days in both (`deletion_clock_days = 30`), identity fields only — financial rows are pseudonymised, not deleted |
+| 12 | **Charity / donation leg** | **Deferred (D36)** | No ledger account at launch; `no_show_disposition = donated` stays reporting-only |
+| 13 | **PAFN / NFSA registration** | **Operational** | Register and export built to the strictest reading; registration is a founder task per market |
+| 14 | **Insurance** | **Deferred (D36)** | Not a contract term at launch; partners keep their own liability cover; revisit before 50 stores |
 
 ### How to handle a `TODO(decision)` in code
 

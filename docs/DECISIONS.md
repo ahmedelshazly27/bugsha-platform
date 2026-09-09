@@ -79,3 +79,42 @@ Confirming a payout that does not exist, or is not in `executing`, raises `BG100
 
 ## D23 — Sign-in is by email code, not SMS (2026-09-09)
 The founder chose email sign-in to avoid an SMS provider for now. Supabase email OTP is used in both apps. The verified identity is the JWT's confirmed email; `consumer_profile.phone` is now an optional contact number the user types, still validated for the market so the store can call about a late pickup. `resend-otp` takes an email. The spec sections that say "phone is identity" (00-product, 07-api) are superseded by this decision. Production needs custom SMTP in Supabase Auth; the built-in mailer is rate-limited to a few messages an hour.
+
+## D24 — Egypt VAT: 14% on commission, platform e-invoices partners (2026-09-09)
+Egypt's standard VAT rate is 14% and applies to service fees; e-invoicing through the Egyptian Tax Authority is mandatory for VAT-registered companies. `vat_bp = 1400`, `vat_base = 'commission'`, `invoicing_mode = 'platform_invoices_partner'`, effective today. VAT is charged on the commission, not on the bag price, because the partner sells the food and the platform sells a service. Registering the entity on the ETA portal is an operational task.
+
+## D25 — Kuwait: no VAT, configuration stays ready
+The Kuwaiti government's current four-year plan rules out VAT before 2028. `vat_applies = false`. `resolve_tax` still refuses a null rate if `vat_applies` is ever flipped on.
+
+## D26 — One legal entity per market
+Payment providers, tax registration and food-authority registration are all national. A Kuwaiti company contracts Kuwaiti partners; an Egyptian company contracts Egyptian partners. Platform entity names are config strings filled in at registration.
+
+## D27 — Payment providers: MyFatoorah (KW, Tap secondary), Paymob (EG)
+Tap covers both countries but is not onboarding new Egyptian merchants. Provider per market is a config row.
+
+## D28 — PSP fees absorbed by the platform
+Partners see one deduction, the commission. Fees are a platform cost line, as at Too Good To Go.
+
+## D29 — Chargebacks borne by the platform, recoverable on evidenced non-fulfilment
+Default `chargeback_bearer = 'platform'`. Where a chargeback follows a partner's documented failure (listing cancelled after the window, no-show marked on a redeemed order), Ops recovers via an adjustment with a reason code.
+
+## D30 — Cash commission is invoiced, in both markets (founder decision)
+`cash_settlement_mode = 'invoice'` by default and on all existing contracts. Cash on pickup is enabled in Kuwait as well (`cash_enabled = true`, `cash` added to payment methods, cap 1 per new cash user). Invoice generation itself is the remaining piece of work.
+
+## D31 — Payout cadence confirmed: weekly, Sunday
+Minimums: 5.000 KWD, 250 EGP.
+
+## D32 — Payout channel: manual (founder decision)
+`market_config.payout_channel = 'manual'`. Finance downloads the run's bank rows and confirms each payout in the console. Bank-file and API channels are future values of the same column.
+
+## D33 — No-show: partner retains; cash writes nothing
+Confirmed as built.
+
+## D34 — Refunds: full both ways; PSP fee on refunds is a platform cost
+Confirmed as built.
+
+## D35 — Retention 10 y (KW) / 5 y (EG); deletion within 30 days
+Kuwait commercial and tax law requires accounting records for ten years. Egypt's VAT executive regulations require five years from the end of the fiscal year. Egypt's data-protection executive regulations (Decree 816/2025, enforced from Oct 2026) expect data-subject requests to be answered within about 30 days; Kuwait's DPPR has no fixed number, so 30 days is applied to both. `request_deletion` now schedules erasure of identity fields on that clock; financial rows are retained and pseudonymised.
+
+## D36 — Charity leg and insurance deferred
+No donation ledger account and no partner insurance clause at launch. Revisit before 50 stores.
