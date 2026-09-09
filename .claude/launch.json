@@ -1,0 +1,1 @@
+{ "version": "0.0.1", "configurations": [ { "name": "ops-web", "runtimeExecutable": "npx", "runtimeArgs": ["expo", "start", "--web", "--port", "8082"], "port": 8082, "cwd": "apps/ops" } ] }
