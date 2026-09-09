@@ -62,6 +62,8 @@ export const useSubmitReview = (db: Bugsha) => useMutation({ mutationFn: (a: { o
 export const useOpenDispute = (db: Bugsha) => useMutation({ mutationFn: (a: { orderId: string; category: string; statement: string; photos?: string[]; illness?: Record<string, unknown> }) => rpc(db, 'open_dispute', { p_order: a.orderId, p_category: a.category, p_statement: a.statement, p_photos: a.photos ?? [], p_illness_detail: a.illness ?? null }) });
 
 // ── Partner ─────────────────────────────────────────────────────────────────
+export interface MyStore { store_id: string; partner_id: string; role: string; display_name: string; trading_name: string; market: string; timezone: string }
+export const useMyStores = (db: Bugsha, enabled = true) => useQuery({ queryKey: ['my_stores'], queryFn: () => rpc<MyStore[]>(db, 'my_stores_detail'), enabled });
 export const useToday = (db: Bugsha, store: string) => useQuery({ queryKey: keys.today(store), queryFn: () => rpc(db, 'today', { p_store: store }), refetchInterval: 30_000 });
 export const useOrdersBoard = (db: Bugsha, store: string) => useQuery({ queryKey: keys.board(store), queryFn: () => rpc(db, 'orders_board', { p_store: store }), refetchInterval: 10_000 });
 export const useLookupOrder = (db: Bugsha, store: string, fragment: string) => useQuery({ queryKey: ['lookup', store, fragment], enabled: fragment.length >= 2, queryFn: () => rpc(db, 'lookup_order', { p_store: store, p_fragment: fragment }) });
