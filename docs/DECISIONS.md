@@ -121,3 +121,6 @@ No donation ledger account and no partner insurance clause at launch. Revisit be
 
 ## D37 — The apps are built from the design system export, not from tokens alone (2026-09-09)
 `packages/ui` is a React Native port of `components/*` in the Claude Design export: Kerchief mark and live-type wordmark, Lucide icons at stroke 2, Archivo / Alexandria / IBM Plex Mono bundled via expo-font, the violet + ink token set, radii 10/8/6/16. Screens follow `ui_kits/consumer`, `ui_kits/partner-platform` and the ops desk chrome. Western digits everywhere, in both languages, per the identity section of the design README; the Arabic-Indic numeral setting is no longer exposed.
+
+## D38 — API exposure and partner activation (2026-09-10)
+The `app` schema is now in PostgREST's exposed schemas (`authenticator` role setting `pgrst.db_schemas = public, graphql_public, app`); it never was before, which is why every app screen loaded empty. A partner becomes `active` automatically once documents are approved, the contract is accepted and one branch has hours (triggers on those tables); `publish_listing` refuses until then so a bag can never be visible but un-purchasable. QA accounts `qa-consumer/partner/ops@bugsha.test` exist with password sign-in for scripts/e2e-*.mjs, which exercise the full sale through the public API.

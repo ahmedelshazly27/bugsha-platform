@@ -1,0 +1,18 @@
+import { createClient } from '@supabase/supabase-js';
+const URL = 'https://fxjvxmuporiwpqalbddv.supabase.co', KEY = 'sb_publishable_KmUlVYOLmpIVVNi6yAiK9w_2OKNDzNv', PW = 'Bugsha-QA-2026!';
+const login = async (email) => { const db = createClient(URL, KEY, { auth: { persistSession: false } }); const { error } = await db.auth.signInWithPassword({ email, password: PW }); if (error) throw error; return db; };
+const rpc = async (db, fn, args = {}) => { const { data, error } = await db.schema('app').rpc(fn, args); if (error) throw new Error(`${fn}: ${error.code ?? ''} ${error.message}`); return data; };
+const step = async (n, f) => { try { const v = await f(); console.log('OK  ', n, typeof v === 'string' ? v : JSON.stringify(v)?.slice(0, 160)); } catch (e) { console.log('FAIL', n, e.message); } };
+const p = await login('qa-partner@bugsha.test'), c = await login('qa-consumer@bugsha.test'), o = await login('qa-ops@bugsha.test');
+const held = 'c75fe8a4-fdfb-41e0-9f21-1a317193fceb', reserved = '47f24a4c-ab26-4f3f-840f-f44ec651d991';
+await step('release the extra hold', () => rpc(c, 'release_hold', { p_order_id: held }).then((r) => r.status));
+await step('partner redeem PD4-CM', () => rpc(p, 'redeem_order', { p_order: reserved, p_mechanism: 'code_shown', p_idempotency: crypto.randomUUID() }).then((r) => `already=${r.already_redeemed}`));
+await step('partner redeem again (idempotent)', () => rpc(p, 'redeem_order', { p_order: reserved, p_mechanism: 'qr_scanned', p_idempotency: crypto.randomUUID() }).then((r) => `already=${r.already_redeemed}`));
+await step('partner collect_cash 2.500', () => rpc(p, 'collect_cash', { p_order: reserved, p_collected_minor: 2500, p_idempotency: crypto.randomUUID() }));
+await step('consumer order status', () => rpc(c, 'order_detail', { p_order: reserved }).then((d) => d.order.status));
+await step('consumer submit_review', () => rpc(c, 'submit_review', { p_order: reserved, p_rating: 5, p_tags: ['generous'], p_body: 'Great bag' }).then((r) => r.id ?? 'ok'));
+await step('partner my_reviews', () => rpc(p, 'my_reviews', { p_partner: 'e95bd774-79cf-4f07-88f1-63f08397bf78' }).then((r) => `${r.length} reviews`));
+await step('ops_orders PD4-CM', () => rpc(o, 'ops_orders', { p_code: 'PD4-CM' }).then((r) => r.map((x) => `${x.code} ${x.status}`)));
+await step('partner cash_liability', () => rpc(p, 'cash_liability', { p_partner: 'e95bd774-79cf-4f07-88f1-63f08397bf78' }));
+await step('partner end_of_day', () => rpc(p, 'end_of_day', { p_store: 'd9b47615-aef9-4119-8653-5c076162fdc5', p_date: new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10) }));
+await step('consumer my_impact', () => rpc(c, 'my_impact'));
