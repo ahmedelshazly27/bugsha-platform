@@ -6,7 +6,10 @@ import { useSession } from '../src/lib/session';
 import { useL } from '../src/lib/ui';
 
 export default function Landing() {
-  const { userId, cityId } = useSession(); const { L, lang } = useL();
+  const { userId, cityId, localeChosen, introSeen, hydrated } = useSession(); const { L, lang } = useL();
+  if (!hydrated) return <View style={{ flex: 1, backgroundColor: color.canvas }} />;
+  if (!localeChosen) return <Redirect href="/onboarding/language" />;
+  if (!introSeen) return <Redirect href="/onboarding/intro" />;
   if (userId && cityId) return <Redirect href="/(tabs)" />;
   if (userId) return <Redirect href="/onboarding/market" />;
   return <View style={{ flex: 1, backgroundColor: color.canvas }}>

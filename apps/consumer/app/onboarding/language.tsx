@@ -9,5 +9,5 @@ export default function Language() {
   return <View style={{ flex: 1 }}><Screen pad={20} gap={16}><Logo lockup="mark" size={38} color={color.brand} />
     <View style={{ gap: 4 }}><T role="titleLg" weight={700}>{L('Choose your language', 'اختر لغتك')}</T><Pp>{L('You can change this later in Settings.', 'يمكنك تغييرها لاحقاً من الإعدادات.')}</Pp></View>
     <View style={{ gap: 10 }}>{row(ar, 'العربية', 'الخليج ومصر', true, () => s.set({ locale: s.market === 'KW' ? 'ar-KW' : 'ar-EG' }))}{row(!ar, 'English', 'Latin numerals', false, () => s.set({ locale: 'en' }))}</View></Screen>
-    <Foot><Button size="lg" fullWidth iconEnd="arrow-right" onPress={() => router.push('/onboarding/intro')}>{L('Continue', 'متابعة')}</Button></Foot></View>;
+    <Foot><Button size="lg" fullWidth iconEnd="arrow-right" onPress={() => { s.set({ localeChosen: true }); router.replace('/onboarding/intro'); }}>{L('Continue', 'متابعة')}</Button></Foot></View>;
 }
