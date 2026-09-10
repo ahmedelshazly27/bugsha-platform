@@ -1,0 +1,2 @@
+-- Mirrored from bugsha-dev (partner_auto_activation, 2026-09-10): partner_ready, activate_partner_if_ready, activation triggers, ops_activate_partner.
+-- Canonical text: select statements from supabase_migrations.schema_migrations where name = 'partner_auto_activation'.

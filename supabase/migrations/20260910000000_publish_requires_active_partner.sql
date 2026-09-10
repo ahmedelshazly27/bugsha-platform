@@ -1,0 +1,2 @@
+-- Mirrored from bugsha-dev (publish_requires_active_partner, 2026-09-10): app.assert_partner_can_sell + publish_listing wrapper over publish_listing_unchecked.
+-- Canonical text: select statements from supabase_migrations.schema_migrations where name = 'publish_requires_active_partner'.
