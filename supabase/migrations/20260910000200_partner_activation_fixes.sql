@@ -1,0 +1,1 @@
+-- Mirrored from bugsha-dev (partner_activation_fixes, 2026-09-10): jsonb-based activation trigger; ops_approve_partner only from application states.

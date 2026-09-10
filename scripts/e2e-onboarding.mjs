@@ -13,14 +13,15 @@ for (const d of required) if (d.status !== 'approved') await step(`upload ${d.do
 const detail = await step('ops_partner_detail', () => rpc(o, 'ops_partner_detail', { p_partner: partnerId }).then((d) => ({ status: d.partner?.onboarding_status, docs: (d.documents ?? []).map((x) => `${x.doc_type}:${x.status}`) })));
 const pending = ((await rpc(o, 'ops_partner_detail', { p_partner: partnerId })).documents ?? []).filter((x) => x.status === 'pending');
 for (const d of pending) await step(`ops_verify_document ${d.doc_type}`, () => rpc(o, 'ops_verify_document', { p_doc: d.id, p_approve: true }));
-await step('ops_approve_partner', () => rpc(o, 'ops_approve_partner', { p_partner: partnerId, p_reason: 'QA verified' }).then((r) => r.onboarding_status));
+const st0 = (await rpc(p, 'my_partner', { p_partner: partnerId })).onboarding_status;
+if (['applied', 'under_review', 'documents_pending'].includes(st0)) await step('ops_approve_partner', () => rpc(o, 'ops_approve_partner', { p_partner: partnerId, p_reason: 'QA verified' }).then((r) => r.onboarding_status)); else console.log('skip approve — status', st0);
 const mp = await step('my_partner', () => rpc(p, 'my_partner', { p_partner: partnerId }));
 if (mp?.contract && !mp.contract.accepted_at) await step('accept_contract', () => rpc(p, 'accept_contract', { p_contract: mp.contract.id, p_ip: '0.0.0.0', p_ua: 'e2e', p_document_hash: 'qa' }).then((r) => !!r.accepted_at));
 await step('set_hours', () => rpc(p, 'set_hours', { p_store: storeId, p_rows: [0, 1, 2, 3, 4, 5, 6].map((w) => ({ weekday: w, opens: '08:00', closes: '23:59' })) }).then((r) => `${r.length} rows`));
 await step('status now', () => rpc(p, 'my_partner', { p_partner: partnerId }).then((d) => d.onboarding_status));
 const tpl = (await rpc(p, 'templates', { p_partner: partnerId }))[0];
 const kw = new Date(Date.now() + 3 * 3600e3); const hh = (d) => String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
-const listing = await step('publish_listing', () => rpc(p, 'publish_listing', { p_template_id: tpl.id, p_quantity: 5, p_local_date: kw.toISOString().slice(0, 10), p_local_start: hh(new Date(kw.getTime() + 3 * 60e3)), p_local_end: hh(new Date(kw.getTime() + 150 * 60e3)), p_idempotency: crypto.randomUUID() }).then((l) => l.listing_id));
+const listing = await step('publish_listing', () => rpc(p, 'publish_listing', { p_template_id: tpl.id, p_quantity: 5, p_local_date: kw.toISOString().slice(0, 10), p_local_start: hh(new Date(kw.getTime() - 2 * 60e3)), p_local_end: hh(new Date(kw.getTime() + 150 * 60e3)), p_idempotency: crypto.randomUUID() }).then((l) => l.listing_id));
 const hold = listing && await step('consumer hold', () => rpc(c, 'hold_listing', { p_listing_id: listing, p_quantity: 1, p_idempotency: crypto.randomUUID() }).then((h) => ({ order_id: h.order_id, code: h.code })));
 if (hold) {
   await step('consumer reserve_cash_order', () => rpc(c, 'reserve_cash_order', { p_order_id: hold.order_id, p_idempotency: crypto.randomUUID() }).then((r) => r.status));
