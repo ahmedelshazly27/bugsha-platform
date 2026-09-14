@@ -6,3 +6,5 @@ export const money = (minor: number, m: Market) => `${CUR[m].code} ${major(minor
 export const minutesLeft = (endUtc: string) => Math.max(0, Math.round((new Date(endUtc).getTime() - Date.now()) / 60000));
 export const hm = (iso: string, tz?: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: tz });
 export const hhmm = (t: string) => String(t).slice(0, 5);
+/** Isolate a date, time or code inside an Arabic sentence so bidi reordering leaves it as typed. */
+export const ltr = (v: string | number) => `\u2066${v}\u2069`;

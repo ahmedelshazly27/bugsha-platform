@@ -4,7 +4,7 @@ import { useState } from 'react'; import { router, useLocalSearchParams } from '
 import { AppBar, Banner, Button, Icon, Input, Pp, Rule, Screen, T, color } from '@bugsha/ui'; import { db } from '../src/lib/supabase'; import { useSession } from '../src/lib/session'; import { useL } from '../src/lib/ui';
 const ENDPOINT = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/waitlist-signup`;
 export default function Waitlist() {
-  const { city } = useLocalSearchParams<{ city: string }>(); const { L } = useL(); const { userId, locale, market } = useSession();
+  const params = useLocalSearchParams<{ city?: string }>(); const { L } = useL(); const { userId, locale, market, cityName } = useSession(); const city = params.city || cityName || (market === 'KW' ? L('Kuwait', 'الكويت') : L('Egypt', 'مصر'));
   const [email, setEmail] = useState(''); const [busy, setBusy] = useState(false); const [done, setDone] = useState<{ position?: number | null; already?: boolean } | null>(null); const [err, setErr] = useState<string | null>(null);
   const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
   const join = async () => { setBusy(true); setErr(null); try {

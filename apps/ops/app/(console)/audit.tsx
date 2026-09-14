@@ -1,10 +1,12 @@
 // S-O-091 Audit log: window, operation and actor filters, CSV export. Every ops action lands here with its reason.
-import { useState } from 'react'; import { View } from 'react-native'; import { useOps } from '@bugsha/api';
+import { useMemo, useState } from 'react'; import { View } from 'react-native'; import { useOps } from '@bugsha/api';
 import { Badge, Button, Caption, Input, ListRow, Num, T, color } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
 import { Choice, Panel, Empty, Row, daysAgo, exportCsv, when, short } from '../../src/lib/console';
 export default function A() {
   const [days, setDays] = useState('7'); const [op, setOp] = useState(''); const [actor, setActor] = useState(''); const [open, setOpen] = useState<string | null>(null);
-  const q = useOps<any[]>(db, 'ops_audit', { p_from: daysAgo(Number(days)).toISOString(), p_to: new Date().toISOString(), p_operation: op.trim() || null, p_actor: /^[0-9a-f-]{36}$/i.test(actor.trim()) ? actor.trim() : null, p_limit: 500 }); const rows = q.data ?? [];
+  // The window is fixed per selection, not per render — otherwise the query key changes every render and refetches forever.
+  const window = useMemo(() => ({ p_from: daysAgo(Number(days)).toISOString(), p_to: new Date().toISOString() }), [days]);
+  const q = useOps<any[]>(db, 'ops_audit', { ...window, p_operation: op.trim() || null, p_actor: /^[0-9a-f-]{36}$/i.test(actor.trim()) ? actor.trim() : null, p_limit: 500 }); const rows = q.data ?? [];
   const ops = Array.from(new Set(rows.map((a) => a.operation))).sort();
   return <>
     <Row style={{ justifyContent: 'space-between' }}><T role="titleLg" weight={700}>Audit</T><Button size="sm" variant="ghost" iconStart="download" onPress={() => exportCsv('audit', rows)}>Export CSV</Button></Row>

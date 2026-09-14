@@ -16,3 +16,5 @@ export const bagTitle = (category: string | null | undefined, ar: boolean) => {
   const k = category ?? 'other'; return ar ? a[k] ?? 'بقشة مفاجأة' : en[k] ?? 'Surprise bag';
 };
 export const regulator = (market: Market, ar: boolean) => (market === 'KW' ? (ar ? 'الهيئة العامة للغذاء والتغذية' : 'PAFN') : ar ? 'الهيئة القومية لسلامة الغذاء' : 'NFSA');
+/** Isolate a date, time or code inside an Arabic sentence so bidi reordering leaves it as typed. */
+export const ltr = (v: string | number) => `\u2066${v}\u2069`;

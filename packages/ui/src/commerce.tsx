@@ -58,8 +58,8 @@ export function BagCard({ partner, title = 'Surprise bag', category = 'other', c
     </CoverPlate>
     <View style={{ flex: 1, minWidth: 0, padding: space[150], paddingStart: row ? 0 : space[150], gap: space[75] }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[100] }}>
-        <T role={hero ? 'title' : 'headline'} weight={600} numberOfLines={1} style={{ flex: 1 }}>{partner}</T>
-        {minutesLeft != null ? <CountdownPill minutesLeft={minutesLeft} format={countdownFormat} /> : null}</View>
+        <T role={hero ? 'title' : 'headline'} weight={600} numberOfLines={row ? 2 : 1} style={{ flex: 1, minWidth: 0 }}>{partner}</T>
+        {minutesLeft != null ? <View style={{ flexShrink: 0 }}><CountdownPill minutesLeft={minutesLeft} format={countdownFormat} /></View> : null}</View>
       <Label color={C.textSecondary}>{title}</Label>
       {meta}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: space[100], marginTop: 2 }}>

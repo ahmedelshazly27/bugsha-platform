@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react';
-import { ScrollView, View, type ViewStyle } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Dimensions, Keyboard, Platform, Pressable, ScrollView, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconButton } from './core';
-import { Caption, Headline, T } from './text';
+import { Caption, Headline, Num, T } from './text';
 import { color as C, space } from './tokens';
 
 /** Screen shell: canvas ground, safe-area aware. Consumer column caps at 420. */
@@ -11,7 +11,18 @@ export function Screen({ children, bg = C.canvas, pad = 14, gap = 12, scroll = t
   const body: ViewStyle = { padding: pad, gap, paddingTop: (top ? insets.top : 0) + pad, paddingBottom: insets.bottom + pad };
   return scroll
     ? <ScrollView style={{ flex: 1, backgroundColor: bg }} contentContainerStyle={[body, style]} keyboardShouldPersistTaps="handled">{children}</ScrollView>
-    : <View style={[{ flex: 1, backgroundColor: bg }, body, style]}>{children}</View>;
+    : <Pressable accessible={false} onPress={Keyboard.dismiss} style={[{ flex: 1, backgroundColor: bg }, body, style]}>{children}</Pressable>;
+}
+/** Height of the soft keyboard over the window (iOS; Android resizes the window itself). */
+export function useKeyboardInset() {
+  const [h, setH] = useState(0);
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    const on = (e: { endCoordinates: { screenY: number } }) => setH(Math.max(0, Math.round(Dimensions.get('window').height - e.endCoordinates.screenY)));
+    const a = Keyboard.addListener('keyboardWillChangeFrame', on); const b = Keyboard.addListener('keyboardDidHide', () => setH(0));
+    return () => { a.remove(); b.remove(); };
+  }, []);
+  return h;
 }
 /** Violet app bar used on brand-heavy screens (browse). Sits under the status bar. */
 export function BrandBar({ children, style, color = C.brandSurface }: { children: ReactNode; style?: ViewStyle; color?: string }) {
@@ -23,14 +34,15 @@ export function AppBar({ title, sub, back = true, onBack, action, backLabel = 'B
   const insets = useSafeAreaInsets();
   return <View style={{ paddingTop: insets.top + 6, paddingHorizontal: 12, paddingBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.raised, borderBottomWidth: 1, borderColor: C.borderSubtle }}>
     {back ? <IconButton icon="arrow-left" mirror label={backLabel} onPress={onBack} /> : null}
-    <View style={{ flex: 1, minWidth: 0 }}>{typeof title === 'string' ? <Headline numberOfLines={1}>{title}</Headline> : title}{sub ? <Caption>{sub}</Caption> : null}</View>
+    <View style={{ flex: 1, minWidth: 0 }}>{typeof title === 'string' ? <Headline numberOfLines={1}>{title}</Headline> : title}{sub ? (/^[\d\s:.,\-–—→\/]+$/.test(sub) ? <Num role="caption" color={C.textSecondary}>{sub}</Num> : <Caption>{sub}</Caption>) : null}</View>
     {action}
   </View>;
 }
 /** Footer with the one primary action, above the home indicator. */
 export function Foot({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  const insets = useSafeAreaInsets();
-  return <View style={[{ padding: 14, paddingBottom: insets.bottom + 10, gap: 8, borderTopWidth: 1, borderColor: C.borderSubtle, backgroundColor: C.raised }, style]}>{children}</View>;
+  const insets = useSafeAreaInsets(); const kb = useKeyboardInset();
+  // Rides above the keyboard so the primary action is always reachable (a number pad has no return key).
+  return <View style={[{ padding: 14, paddingBottom: (kb > 0 ? 0 : insets.bottom) + 10, marginBottom: kb, gap: 8, borderTopWidth: 1, borderColor: C.borderSubtle, backgroundColor: C.raised }, style]}>{children}</View>;
 }
 export const Stack = ({ children, g = 10, style }: { children: ReactNode; g?: number; style?: ViewStyle }) => <View style={[{ gap: g }, style]}>{children}</View>;
 export const Row = ({ children, g = 8, style }: { children: ReactNode; g?: number; style?: ViewStyle }) => <View style={[{ flexDirection: 'row', alignItems: 'center', gap: g }, style]}>{children}</View>;

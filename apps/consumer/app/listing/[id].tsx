@@ -32,7 +32,7 @@ export default function Listing() {
         <Pp>{l.description || L("Whatever the kitchen made today and didn't sell. Contents change nightly — that's the point. Ask at the counter for allergens on any item.", 'ما صنعه المطبخ اليوم ولم يُبع. المحتويات تتغير كل ليلة — هذه الفكرة. اسأل عند الكاشير عن مسببات الحساسية.')}</Pp>
         {(l.dietary_flags ?? []).length ? <Chips>{(l.dietary_flags as string[]).map((f) => <Chip key={f}>{f.replace(/_/g, ' ')}</Chip>)}</Chips> : null}</View>
       <Rule />
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[150] }}><PriceTag now={major(l.price_minor, market)} was={l.value_min_minor ? major(l.value_min_minor, market) : null} currency={cur.code} decimals={cur.dp} size="lg" /><Stepper value={qty} min={1} max={Math.max(1, Math.min(3, l.quantity_remaining))} onChange={setQty} /></View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[150] }}><View style={{ flex: 1, minWidth: 0 }}><PriceTag now={major(l.price_minor, market)} was={l.value_min_minor ? major(l.value_min_minor, market) : null} currency={cur.code} decimals={cur.dp} size="lg" /></View><View style={{ flexShrink: 0 }}><Stepper value={qty} min={1} max={Math.max(1, Math.min(3, l.quantity_remaining))} onChange={setQty} /></View></View>
       {restricted ? <Banner tone="error" title={L('Reservations are paused on your account', 'الحجز متوقف على حسابك')} action={L('Details', 'التفاصيل')} onAction={() => router.push('/account/restricted')} /> : null}
       {err ? <Banner tone="error" title={err} /> : null}
     </Screen>

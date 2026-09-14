@@ -178,3 +178,14 @@ Each job gets: a happy-path test, an idempotency test (run twice, same result), 
 - Ops users for all six roles, KW-scoped and EG-scoped
 
 The fixture set is what makes the ops console and the payout screens testable at all. Build it in phase 1, not phase 11.
+
+## Visual render harness (2026-09-14)
+
+`scripts/render-screens.mjs` screenshots every screen of the consumer, partner and ops apps from a web export, against recorded API fixtures (no network), in English and Arabic at 390×844 (ops at 1280×860). It is how the layout pass is verified without a device.
+
+```
+cd apps/consumer && npx expo export -p web --output-dir /tmp/web-consumer     # needs EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY
+PLAYWRIGHT_DIR=<dir containing node_modules/playwright-core> node scripts/render-screens.mjs consumer /tmp/web-consumer scripts/fixtures/consumer.json out/consumer
+```
+
+`scripts/metro.web-stubs.js` stubs `react-native-maps` and `expo-sqlite` for the web target only; EAS builds are untouched. Fixtures are captured by calling the RPCs as the QA users (`request.jwt.claims` set in a transaction) and saved as JSON; the harness adds a few synthetic rows (a held order, a reserved order with a QR, a cash order on the board, a payout, a quality flag) so every state has a screen. `report.json` lists console errors and redirects per route.

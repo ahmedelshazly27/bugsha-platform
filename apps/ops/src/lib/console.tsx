@@ -5,7 +5,7 @@ import { isPendingApproval } from '@bugsha/api'; import { Caption, Chip, Chips, 
 export type Market = 'KW' | 'EG';
 export const MARKETS: Market[] = ['KW', 'EG'];
 const CUR: Record<Market, { code: string; dp: number }> = { KW: { code: 'KWD', dp: 3 }, EG: { code: 'EGP', dp: 2 } };
-export const money = (minor: number | string | null | undefined, market: Market | string = 'KW') => { const c = CUR[(market as Market)] ?? CUR.KW; const n = Number(minor ?? 0) / 10 ** c.dp; return `${n.toLocaleString('en-GB', { minimumFractionDigits: c.dp, maximumFractionDigits: c.dp })} ${c.code}`; };
+export const money = (minor: number | string | null | undefined, market: Market | string = 'KW') => { const c = CUR[(market as Market)] ?? CUR.KW; const n = Number(minor ?? 0) / 10 ** c.dp; return `${c.code} ${n.toLocaleString('en-GB', { minimumFractionDigits: c.dp, maximumFractionDigits: c.dp })}`; };
 export const toMinor = (major: string, market: Market | string = 'KW') => Math.round(Number(major || 0) * 10 ** ((CUR[market as Market] ?? CUR.KW).dp));
 export const when = (iso?: string | null) => iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
 export const day = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
