@@ -153,3 +153,18 @@ export const useUpsertSchedule = (db: Bugsha) => useMutation({ mutationFn: (a: R
 export const useSchedules = (db: Bugsha, storeId: string) => useQuery({ queryKey: ['schedules', storeId], enabled: !!storeId, queryFn: () => rpc<any[]>(db, 'schedules', { p_store: storeId }) });
 export const usePauseSchedule = (db: Bugsha) => useMutation({ mutationFn: (id: string) => rpc(db, 'pause_schedule', { p_schedule: id }) });
 export const usePauseStore = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; reason: string; until: string }) => rpc(db, 'pause_store', { p_store: a.storeId, p_reason_code: a.reason, p_until: a.until }) });
+
+// ── Screens added 2026-09-14 (client surface for the design-system screens) ──
+/** Quiet hours and channels alongside categories (S-C-041). */
+export const useSetNotificationPreferences = (db: Bugsha) => useMutation({ mutationFn: (a: { categories: Record<string, boolean>; quietFrom?: string | null; quietTo?: string | null; channels?: string[] }) => rpc(db, 'set_notification_preferences', { p_categories: a.categories, p_quiet_from: a.quietFrom ?? null, p_quiet_to: a.quietTo ?? null, p_channels: a.channels ?? ['push'] }) });
+/** Undo inside the deletion clock (S-C-042). */
+export const useCancelDeletion = (db: Bugsha) => useMutation({ mutationFn: () => rpc<any>(db, 'cancel_deletion') });
+export const useQualityFlags = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['quality_flags', partnerId], enabled: !!partnerId, queryFn: () => rpc<any[]>(db, 'my_quality_flags', { p_partner: partnerId }) });
+export const useAcknowledgeFlag = (db: Bugsha) => useMutation({ mutationFn: (a: { flagId: string; finding: string; action: string }) => rpc(db, 'acknowledge_flag', { p_flag: a.flagId, p_finding: a.finding, p_action_text: a.action }) });
+export const useMyDisputes = (db: Bugsha, partnerId: string) => useQuery({ queryKey: ['my_disputes', partnerId], enabled: !!partnerId, queryFn: () => rpc<any[]>(db, 'my_disputes', { p_partner: partnerId }) });
+export const useRespondDispute = (db: Bugsha) => useMutation({ mutationFn: (a: { disputeId: string; statement: string }) => rpc(db, 'respond_dispute', { p_dispute: a.disputeId, p_statement: a.statement }) });
+export const useSetActiveShift = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; staffUserId: string }) => rpc(db, 'set_active_shift', { p_store: a.storeId, p_staff_user: a.staffUserId }) });
+export const usePauseReservations = (db: Bugsha) => useMutation({ mutationFn: (a: { storeId: string; reason: string }) => rpc<any>(db, 'pause_store_reservations', { p_store: a.storeId, p_reason: a.reason }) });
+export const useResumeReservations = (db: Bugsha) => useMutation({ mutationFn: (storeId: string) => rpc<any>(db, 'resume_store_reservations', { p_store: storeId }) });
+/** QR at the counter: same RPC, different mechanism (audited). */
+export const useRedeemScanned = (db: Bugsha) => useMutation({ mutationFn: (a: { orderId: string; key?: string; staffUserId?: string }) => rpc<any>(db, 'redeem_order', { p_order: a.orderId, p_mechanism: 'qr_scanned', p_idempotency: a.key ?? newIdempotencyKey(), p_staff_user: a.staffUserId ?? null }) });

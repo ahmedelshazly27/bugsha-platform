@@ -12,7 +12,7 @@ export default function Email() {
     router.push({ pathname: '/auth/code', params: { email: email.trim().toLowerCase() } });
   }
   return <View style={{ flex: 1 }}><AppBar title={L('Your email', 'بريدك الإلكتروني')} onBack={() => router.back()} />
-    <Screen top={false} pad={16}><Pp>{L('We send a six-digit code. No password to remember.', 'سنرسل رمزاً من ست خانات. لا حاجة لكلمة مرور.')}</Pp>
+    <Screen top={false} pad={16}><Pp>{L('We send an 8-digit code. No password to remember.', 'سنرسل رمزاً من 8 خانات. لا حاجة لكلمة مرور.')}</Pp>
       <Input label={L('Email', 'البريد الإلكتروني')} placeholder="name@example.com" icon="user" value={email} onChangeText={(v) => { setEmail(v); setErr(undefined); }} keyboardType="email-address" autoCapitalize="none" autoComplete="email" autoFocus error={err} onSubmitEditing={send} /></Screen>
     <Foot><Button size="lg" fullWidth disabled={!valid} loading={busy} onPress={send}>{L('Send code', 'إرسال الرمز')}</Button></Foot></View>;
 }
