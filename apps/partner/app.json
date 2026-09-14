@@ -42,6 +42,12 @@
       ],
       "expo-font",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Bugsha Partner scans the QR code on a customer's reservation at the counter."
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "Used once to place your store pin."

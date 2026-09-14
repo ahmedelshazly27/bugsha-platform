@@ -7,3 +7,4 @@ export * from './core';
 export * from './layout';
 export * from './commerce';
 export * from './partner';
+export * from './qr';

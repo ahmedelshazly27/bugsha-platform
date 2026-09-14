@@ -4,7 +4,7 @@
 // the store: refund plus goodwill. Refunded: destination and timing per method.
 import { useEffect, useState } from 'react'; import { router, useLocalSearchParams } from 'expo-router'; import { View } from 'react-native';
 import { useCancelOrder, useOrder, useProfile, useReleaseHold, useSubmitReview, useWallet } from '@bugsha/api'; import { refundTimingMessage } from '@bugsha/i18n';
-import { AppBar, Banner, BottomSheet, Button, Caption, Card, Chip, Chips, CountdownPill, Foot, Icon, IconButton, Input, Line, Num, PickupWindow, RatingStars, RedemptionCode, Rule, Screen, T, color } from '@bugsha/ui';
+import { AppBar, Banner, BottomSheet, Button, Caption, Card, Chip, Chips, CountdownPill, Foot, Icon, IconButton, Input, Line, Num, PickupWindow, RatingStars, QrCode, RedemptionCode, Rule, Screen, T, color, redeemDeepLink } from '@bugsha/ui';
 import { db } from '../../src/lib/supabase'; import { useSession } from '../../src/lib/session'; import { cdFmt, minutesLeft, money, useL } from '../../src/lib/ui';
 const TAGS: Array<[string, string, string]> = [['generous', 'Generous', 'سخية'], ['fresh', 'Fresh', 'طازجة'], ['as_described', 'As described', 'كما وُصفت'], ['friendly_staff', 'Friendly staff', 'طاقم ودود'], ['smaller_than_expected', 'Smaller than expected', 'أصغر من المتوقع'], ['slow_handover', 'Slow handover', 'تسليم بطيء']];
 export default function Order() {
@@ -38,6 +38,7 @@ export default function Order() {
       {reserved || redeemed ? <>
         <T align="center" color={color.textSecondary}>{redeemed ? L('Enjoy it.', 'بالعافية.') : L('Show this at the counter', 'أظهر هذا عند الكاشير')}</T>
         <RedemptionCode code={o.code} partner={st.display_name} window={win} quantity={o.quantity} state={redeemed ? 'redeemed' : 'ready'} bagLabel={o.quantity > 1 ? L('bags', 'بقش') : L('bag', 'بقشة')} slideLabel={L('Staff confirms on their device', 'الموظف يؤكد من جهازه')} doneLabel={L('Collected', 'تم الاستلام')} />
+        {reserved ? <QrCode value={redeemDeepLink(o.code)} size={150} /> : null}
         {reserved ? <View style={{ alignItems: 'center' }}><CountdownPill state="reserved" minutesLeft={mins} format={cdFmt(ar)} /></View> : null}
         {reserved && o.method === 'cash' ? <Banner tone="info" title={L(`Bring ${money(o.total_minor, market)} in cash`, `أحضر ${money(o.total_minor, market)} نقداً`)}>{L('Exact amount helps. Not collecting counts as a no-show.', 'المبلغ المضبوط يساعد. عدم الاستلام يُحسب غياباً.')}</Banner> : null}
         {pickupCard}
