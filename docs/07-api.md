@@ -71,6 +71,7 @@ select * from app.search_listings(:query, :market, :city)  -- diacritic + hamza 
 select * from "order" where consumer_id = auth.uid()
 select * from app.order_detail(:order_id)          -- + payment, redemption, refund timeline
 select * from app.my_impact()                      -- money saved, bags, stores, kg
+select * from app.my_profile()                     -- + restricted_until, restriction_reason_code, deletion_requested_at (2026-09-14)
 select * from app.wallet_balance()
 ```
 
@@ -94,6 +95,7 @@ select * from app.wallet_balance()
 | `app.submit_review(order_id, rating, tags[], body, photo)` | Redeemed orders only (rule 9) |
 | `app.open_dispute(order_id, category, statement, photos[], illness_detail?)` | `illness_detail` present ⇒ severity `critical`, routes to Compliance, partner not asked to triage |
 | `app.request_deletion()` | Starts the statutory clock; blocked by pending orders |
+| `app.cancel_deletion()` | Undo within the 30-day window (2026-09-14) |
 
 ### Edge Functions
 

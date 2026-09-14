@@ -161,3 +161,13 @@ Universal states, required on every consumer screen: `default · loading · skel
 | `§8.5` | Warehouse | `bi.*` masked views | `app.ops_request_bulk_export` | engineering — masked by default; > 100 PII rows needs four eyes |
 | `§8.6` | Runbook | `app.ops_runbook(key)` | — | engineering — each step states its ledger effect |
 | `§10` | Blocking decisions | `app.ops_blocking_decisions()` | `app.ops_update_decision` | admin — the `TODO(decision)` register from `13-config.md`, with owners and dates |
+
+## 2026-09-14 screen pass — what the Expo apps now implement
+
+Every row above has a screen in `apps/consumer`, `apps/partner` or `apps/ops` on branch `claude/partner-code-gate`; the design kits in the bugsha repo (`.claude/skills/bugsha-design/ui_kits/*`) are the visual reference.
+
+- **Consumer** — three-locale language choice; 8-digit email OTP; home bell → notification preferences (categories, quiet hours, channels) and a restriction banner; listing heart + share; promo code, VAT and service fee at pay; every order state (hold countdown, Fawry reference, cash, running late, review with tags, no-show warnings, partner cancellation, refunds, cancel with refund destination); **pickup QR** (`bugsha://redeem/<CODE>`) next to the code; waitlist sign-up; deletion undo; restricted screen.
+- **Partner** — join / code / application / request; onboarding status hub with history; **redeem by QR scan or code**, late hand-over past the grace window when online, 60 s undo; schedules; branch pause/resume and branch switching; quality flags acknowledge + dispute replies + quality-hold banner; staff on-shift; commission from the contract.
+- **Ops** — live dashboard (KPIs, needs-a-person, funnel, supply vs demand); partners with stage filters; partner detail (documents, contracts + commission, suspend/reinstate, reliability override, reject); orders with detail and the force actions; moderation; disputes (assign, resolve with goodwill/refund/none), incidents, quality holds; users (restrict, credit, impersonate); money (payout runs two-approver flow, execute, confirm, reconciliation, revenue, tax, ledger, CSV); config (propose, flags, cities); notification templates (edit → review → publish, lock-screen preview); audit filters + CSV; jobs.
+
+Not exposed by the platform yet, so not on a screen: `app.ops_refund_preview`, `app.ops_assign_task`, `app.ops_create_acquisition_list`, `app.ops_store_detail`, `app.ops_impersonation_sessions`, `app.ops_close_period_checklist`, a quality-hold list (holds are placed/released from the incident that owns them).
