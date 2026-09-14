@@ -1,0 +1,33 @@
+// S-O-080 Notification templates per key and locale: edit (new version), review, publish once all three locales
+// are reviewed; lock-screen preview; recent sends.
+import { useState } from 'react'; import { View } from 'react-native'; import { useOps, useOpsMutation } from '@bugsha/api';
+import { Badge, Banner, Button, Caption, Eyebrow, Input, ListRow, Switch, T, color } from '@bugsha/ui'; import { db } from '../../src/lib/supabase';
+import { Choice, FormBox, Panel, Empty, Row, useAct, when } from '../../src/lib/console';
+const LOCALES: Array<[string, string]> = [['en', 'English'], ['ar-KW', 'Arabic · Kuwait'], ['ar-EG', 'Arabic · Egypt']];
+export default function N() {
+  const q = useOps<any[]>(db, 'ops_templates'); const log = useOps<any[]>(db, 'ops_notifications', { p_limit: 30 }); const upsert = useOpsMutation(db, 'ops_upsert_template'); const review = useOpsMutation(db, 'ops_review_template'); const publish = useOpsMutation(db, 'publish_notification_template'); const { msg, tone, act } = useAct();
+  const [key, setKey] = useState<string | null>(null); const [locale, setLocale] = useState('en'); const [edit, setEdit] = useState(false); const [title, setTitle] = useState(''); const [body, setBody] = useState(''); const [link, setLink] = useState(''); const [bypass, setBypass] = useState(false);
+  const rows = q.data ?? []; const keys = Array.from(new Set(rows.map((t) => t.key))); const forKey = rows.filter((t) => t.key === key); const latestVersion = Math.max(0, ...forKey.map((t) => Number(t.version))); const t = forKey.filter((x) => x.locale === locale).sort((a, b) => b.version - a.version)[0];
+  const status = (k: string) => { const v = rows.filter((x) => x.key === k); const pub = v.some((x) => x.published); const maxV = Math.max(0, ...v.map((x) => Number(x.version))); const reviewed = LOCALES.every(([l]) => v.some((x) => x.locale === l && x.version === maxV && x.reviewed_at)); return pub && reviewed ? ['published', 'fresh'] : reviewed ? ['reviewed — publish', 'time'] : ['draft', 'neutral']; };
+  const startEdit = () => { setTitle(t?.title ?? ''); setBody(t?.body ?? ''); setLink(t?.deep_link ?? ''); setBypass(!!t?.bypasses_quiet_hours); setEdit(true); }; const refetch = () => { q.refetch(); setEdit(false); };
+  return <>
+    <T role="titleLg" weight={700}>Notifications</T>
+    <Caption>Each key has three locales. Editing any locale creates a new version; every locale of that version must be reviewed by someone else before the version can be published.</Caption>
+    {msg ? <Banner tone={tone} title={msg} /> : null}
+    <View style={{ flexDirection: 'row', gap: 14, alignItems: 'flex-start' }}>
+      <Panel style={{ flex: 1 }}>{keys.length === 0 ? <Empty>{q.isLoading ? 'Loading…' : 'No templates.'}</Empty> : keys.map((k) => { const s = status(k); return <ListRow key={k} icon="bell" chevron onPress={() => { setKey(k); setEdit(false); }} label={<T role="label" weight={600}>{k}</T>} sub={`v${Math.max(0, ...rows.filter((x) => x.key === k).map((x) => Number(x.version)))} · ${rows.filter((x) => x.key === k).length} locale rows`} value={<Badge tone={s[1] as any}>{s[0]}</Badge>} />; })}</Panel>
+      {key ? <View style={{ width: 480, gap: 10 }}><Panel style={{ padding: 14, gap: 10 }}>
+        <Row style={{ justifyContent: 'space-between' }}><T role="title" weight={700}>{key}</T><Button size="sm" variant="ghost" onPress={() => setKey(null)}>Close</Button></Row>
+        <Choice options={LOCALES} value={locale} onChange={(l) => { setLocale(l); setEdit(false); }} />
+        {t ? <>
+          <Row><Badge tone={t.published ? 'fresh' : 'neutral'}>{t.published ? 'published' : 'unpublished'}</Badge><Badge tone={t.reviewed_at ? 'fresh' : 'time'}>{t.reviewed_at ? `reviewed ${when(t.reviewed_at)}` : 'needs review'}</Badge><Caption>{`v${t.version}${t.bypasses_quiet_hours ? ' · bypasses quiet hours' : ''}`}</Caption></Row>
+          <Eyebrow>Lock-screen preview</Eyebrow>
+          <View style={{ backgroundColor: color.inverse, borderRadius: 14, padding: 14, gap: 4, direction: locale.startsWith('ar') ? 'rtl' : 'ltr' }}><Row style={{ justifyContent: 'space-between' }}><T role="caption" weight={600} color="#fff">Bugsha</T><T role="caption" color="rgba(255,255,255,.6)">now</T></Row><T role="label" weight={600} color="#fff">{edit ? title : t.title}</T><T role="label" color="rgba(255,255,255,.85)">{edit ? body : t.body}</T>{(edit ? link : t.deep_link) ? <T role="caption" color="rgba(255,255,255,.5)">{edit ? link : t.deep_link}</T> : null}</View>
+          {!edit ? <Row><Button size="sm" variant="secondary" onPress={startEdit}>Edit (new version)</Button>{!t.reviewed_at ? <Button size="sm" onPress={() => act(review, { p_key: key, p_locale: locale, p_version: t.version }, `${locale} v${t.version} reviewed`, refetch)}>Mark reviewed</Button> : null}<Button size="sm" variant="ghost" disabled={!LOCALES.every(([l]) => forKey.some((x) => x.locale === l && x.version === latestVersion && x.reviewed_at))} onPress={() => act(publish, { p_key: key, p_version: latestVersion }, `v${latestVersion} published in all locales`, refetch)}>Publish v{latestVersion}</Button></Row> : null}
+        </> : <Caption>No {locale} row yet — add one below.</Caption>}
+        {!t && !edit ? <Button size="sm" variant="secondary" onPress={startEdit}>Write {locale}</Button> : null}
+        {edit ? <FormBox title={`${locale} · new version`}><Input label="Title" value={title} onChangeText={setTitle} /><Input label="Body" value={body} onChangeText={setBody} multiline /><Input label="Deep link (optional)" value={link} onChangeText={setLink} placeholder="bugsha://order/{order_id}" /><Switch label="Bypasses quiet hours (only for pickup-critical alerts)" checked={bypass} onChange={setBypass} /><Caption>Placeholders like {'{first_name}'} and {'{code}'} are filled at send time.</Caption><Row><Button disabled={!title.trim() || !body.trim()} onPress={() => act(upsert, { p_key: key, p_locale: locale, p_title: title.trim(), p_body: body.trim(), p_deep_link: link.trim() || null, p_bypasses_quiet_hours: bypass }, 'Saved as a new version — needs review in every locale', refetch)}>Save</Button><Button variant="ghost" onPress={() => setEdit(false)}>Cancel</Button></Row></FormBox> : null}
+      </Panel></View> : null}</View>
+    <Eyebrow>Recent sends</Eyebrow>
+    <Panel>{(log.data ?? []).length === 0 ? <Empty>Nothing sent yet.</Empty> : (log.data ?? []).map((n: any) => <ListRow key={n.id} label={n.template_key} sub={`${(n.channels ?? []).join('/')} · ${when(n.sent_at)}`} value={n.suppressed_reason ? <Badge tone="neutral">{`suppressed · ${n.suppressed_reason}`}</Badge> : <Badge tone="fresh">sent</Badge>} />)}</Panel>
+  </>; }
