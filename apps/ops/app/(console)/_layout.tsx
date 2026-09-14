@@ -1,7 +1,7 @@
 // Ops console desk chrome: dark sidebar (partner-platform SideNav), content column capped at 1120.
 import { Redirect, Slot, usePathname, router } from 'expo-router'; import { Pressable, ScrollView, View } from 'react-native';
 import { Icon, Mark, T, color } from '@bugsha/ui'; import { db } from '../../src/lib/supabase'; import { useSession } from '../../src/lib/session';
-const NAV = [['dashboard', 'house', 'Live'], ['partners', 'store', 'Partners'], ['orders', 'receipt', 'Orders'], ['disputes', 'triangle-alert', 'Disputes'], ['money', 'wallet', 'Money'], ['config', 'settings', 'Config'], ['jobs', 'refresh-cw', 'Jobs'], ['audit', 'file-text', 'Audit']] as const;
+const NAV = [['dashboard', 'house', 'Live'], ['requests', 'inbox', 'Requests'], ['partners', 'store', 'Partners'], ['orders', 'receipt', 'Orders'], ['disputes', 'triangle-alert', 'Disputes'], ['money', 'wallet', 'Money'], ['config', 'settings', 'Config'], ['jobs', 'refresh-cw', 'Jobs'], ['audit', 'file-text', 'Audit']] as const;
 export default function L() { const { userId } = useSession(); const path = usePathname(); if (!userId) return <Redirect href="/signin" />;
   return <View style={{ flex: 1, flexDirection: 'row', backgroundColor: color.canvas }}>
     <View style={{ width: 208, backgroundColor: color.inverse, paddingVertical: 16, paddingHorizontal: 10, gap: 2 }}>

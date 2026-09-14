@@ -3,11 +3,15 @@ begin; select plan(12); delete from tests.p3;
 insert into auth.users (instance_id, id, aud, role, phone, phone_confirmed_at, created_at, updated_at)
 values ('00000000-0000-0000-0000-000000000000','bbbbbbbb-0000-4000-8000-0000000000f9','authenticated','authenticated','+96599999999', now(), now(), now()) on conflict (id) do nothing;
 insert into app_user (id, primary_market, locale) values ('bbbbbbbb-0000-4000-8000-0000000000f9','KW','ar-KW') on conflict do nothing;
+-- A partner account opens only with a code ops issued (20260914094502). Two fixture codes: one to redeem, one for the alcohol check.
+insert into partner_invite_code (code, market, issued_to_name, issued_to_email, legal_name, trading_name, issued_by, expires_at) values
+  ('BG-TEST-2345', 'KW', 'New Bakery', 'sara@new.fixture', 'New Bakery Co.', 'New Bakery', tests.uid('ops', 6), now() + interval '14 days'),
+  ('BG-TEST-2346', 'KW', 'X', 'x@x.fixture', 'X', 'X', tests.uid('ops', 6), now() + interval '14 days');
 select tests.authenticate_as('bbbbbbbb-0000-4000-8000-0000000000f9');
-insert into tests.p3 select 'partner', (app.submit_application('KW','New Bakery Co.','New Bakery','{bakery}','Sara','+96599999999','sara@new.fixture','11111111-0000-4000-8000-000000000001', 1)).partner_id;
+insert into tests.p3 select 'partner', (app.submit_application('BG-TEST-2345','KW','New Bakery Co.','New Bakery','{bakery}','Sara','+96599999999','sara@new.fixture','11111111-0000-4000-8000-000000000001', 1)).partner_id;
 select is((select onboarding_status::text from partner where partner_id=(select v from tests.p3 where k='partner')), 'applied', 'O-1: an application creates a partner in applied');
 select isnt_empty($$ select 1 from staff_assignment where user_id='bbbbbbbb-0000-4000-8000-0000000000f9' and role='owner' and partner_wide $$, 'O-2: the applicant becomes its owner');
-select throws_ok($$ select app.submit_application('KW','X','X','{alcohol}','S','+96599999998','x@x','11111111-0000-4000-8000-000000000001') $$, 'BG105', null, 'O-3: alcohol is refused at application');
+select throws_ok($$ select app.submit_application('BG-TEST-2346','KW','X','X','{alcohol}','S','+96599999998','x@x','11111111-0000-4000-8000-000000000001') $$, 'BG105', null, 'O-3: alcohol is refused at application');
 select lives_ok($$ select app.upload_document((select v from tests.p3 where k='partner'),'moci_licence','fixtures/x.pdf', null, current_date + 365) $$, 'O-4: the owner uploads a document');
 select is((select onboarding_status::text from partner where partner_id=(select v from tests.p3 where k='partner')), 'under_review', 'O-5: which moves the partner to under_review');
 select throws_ok($$ select app.upload_document((select v from tests.p3 where k='partner'),'health_licence','fixtures/x.pdf') $$, 'BG102', null, 'O-6: an Egyptian document type is refused for a Kuwaiti partner');

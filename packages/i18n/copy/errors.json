@@ -86,6 +86,46 @@
     "ar-KW": "هذا المتجر متوقف حتى {time}",
     "ar-EG": "المحل ده متوقف لحد {time}"
   },
+  "BG122": {
+    "en": "That partner code isn't live",
+    "ar-KW": "رمز الشريك هذا غير فعّال",
+    "ar-EG": "كود الشريك ده مش شغال"
+  },
+  "BG122.body": {
+    "en": "Codes work once and expire after 14 days. Check the email it came in, or ask the partner team for a new one.",
+    "ar-KW": "الرمز يُستخدم مرة واحدة وينتهي بعد 14 يوماً. راجع الإيميل اللي وصلك فيه، أو اطلب رمزاً جديداً من فريق الشركاء.",
+    "ar-EG": "الكود بيتستخدم مرة واحدة وبيخلص بعد 14 يوم. راجع الإيميل اللي جالك فيه، أو اطلب كود جديد من فريق الشركاء."
+  },
+  "BG123": {
+    "en": "This code was issued for a different country",
+    "ar-KW": "هذا الرمز صادر لدولة أخرى",
+    "ar-EG": "الكود ده متعمل لبلد تانية"
+  },
+  "BG124": {
+    "en": "We couldn't find that request or code",
+    "ar-KW": "ما لقينا هذا الطلب أو الرمز",
+    "ar-EG": "ملقيناش الطلب أو الكود ده"
+  },
+  "BG125": {
+    "en": "A code was already issued for this request",
+    "ar-KW": "صدر رمز لهذا الطلب من قبل",
+    "ar-EG": "اتعمل كود للطلب ده قبل كده"
+  },
+  "BG126": {
+    "en": "This code was already used — suspend the partner instead",
+    "ar-KW": "هذا الرمز مستخدم بالفعل — أوقف الشريك بدلاً من ذلك",
+    "ar-EG": "الكود ده اتستخدم فعلاً — وقّف الشريك بدل كده"
+  },
+  "BG127": {
+    "en": "This request was declined",
+    "ar-KW": "رُفض هذا الطلب",
+    "ar-EG": "الطلب ده اترفض"
+  },
+  "BG128": {
+    "en": "This code is no longer live, so it can't be re-sent",
+    "ar-KW": "هذا الرمز لم يعد فعّالاً، فلا يمكن إعادة إرساله",
+    "ar-EG": "الكود ده مبقاش شغال، فمينفعش يتبعت تاني"
+  },
   "BG130": {
     "en": "A second approver is needed",
     "ar-KW": "مطلوب موافقة ثانية",

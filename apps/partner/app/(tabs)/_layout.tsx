@@ -1,6 +1,6 @@
 // Partner phone surface. After sign-in: pick the store you act on, then Today · Orders · Listings · More.
 import { useEffect } from 'react'; import { Redirect, Tabs, router } from 'expo-router'; import { Pressable, View } from 'react-native'; import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMyStores, useOrdersBoard } from '@bugsha/api';
+import { useMyPartners, useMyStores, useOrdersBoard } from '@bugsha/api';
 import { AppBar, Banner, Button, Caption, Icon, ListRow, Num, Screen, T, color } from '@bugsha/ui';
 import { db } from '../../src/lib/supabase'; import { useSession } from '../../src/lib/session'; import { useStore } from '../../src/lib/store'; import { useL } from '../../src/lib/ui';
 function Bar({ state, navigation }: any) {
@@ -14,10 +14,15 @@ function Bar({ state, navigation }: any) {
 }
 export default function L_() {
   const { userId } = useSession(); const s = useStore(); const { L } = useL(); const q = useMyStores(db, !!userId);
+  // No branch yet: an applicant mid-onboarding belongs to a partner but my_stores_detail is empty until a store exists.
+  const mine = useMyPartners(db, !!userId && q.isSuccess && (q.data ?? []).length === 0); const applicant = (mine.data ?? [])[0];
   useEffect(() => { const only = (q.data ?? [])[0]; if (q.data?.length === 1 && only && !s.storeId) s.set({ storeId: only.store_id, partnerId: only.partner_id, role: only.role as any, storeName: only.display_name, tradingName: only.trading_name, market: only.market as any, timezone: only.timezone }); }, [q.data]);
   if (!userId) return <Redirect href="/signin" />;
+  if (!s.storeId && applicant) { if (s.partnerId !== applicant.partner_id) s.set({ partnerId: applicant.partner_id, tradingName: applicant.trading_name, market: applicant.market as any, role: applicant.role as any }); return <Redirect href="/onboarding" />; }
   if (!s.storeId) { const rows = q.data ?? []; return <View style={{ flex: 1 }}><AppBar title={L('Choose a store', 'اختر متجراً')} back={false} />
-    <Screen top={false} gap={0}>{q.isLoading ? <Caption>…</Caption> : rows.length === 0 ? <View style={{ gap: 12, paddingTop: 8 }}><Banner tone="info" title={L("This account isn't assigned to a store yet", 'هذا الحساب غير مرتبط بمتجر بعد')}>{L('Ask your owner to invite this email, or apply as a new partner.', 'اطلب من المالك دعوة هذا البريد، أو قدّم كشريك جديد.')}</Banner><Button variant="ghost" onPress={() => db.auth.signOut()}>{L('Sign out', 'تسجيل الخروج')}</Button></View>
+    <Screen top={false} gap={0}>{q.isLoading ? <Caption>…</Caption> : rows.length === 0 ? <View style={{ gap: 12, paddingTop: 8 }}><Banner tone="info" title={L("This account isn't assigned to a store yet", 'هذا الحساب غير مرتبط بمتجر بعد')}>{L('Work at a kitchen already on Bugsha? Ask your owner to invite this email. New kitchen? Join with a partner code from the Bugsha team.', 'تعمل في مطبخ موجود على بقشة؟ اطلب من المالك دعوة هذا البريد. مطبخ جديد؟ انضم برمز شريك من فريق بقشة.')}</Banner>
+      {mine.isLoading ? <Caption>…</Caption> : <><Button iconStart="key" onPress={() => router.push('/join/code')}>{L('I have a partner code', 'عندي رمز شريك')}</Button><Button variant="secondary" iconStart="mail" onPress={() => router.push('/join/request')}>{L('Request a partner code', 'اطلب رمز شريك')}</Button></>}
+      <Button variant="ghost" onPress={() => db.auth.signOut()}>{L('Sign out', 'تسجيل الخروج')}</Button></View>
       : rows.map((r) => <ListRow key={r.store_id} icon="store" label={r.display_name} sub={`${r.trading_name} · ${r.role}`} chevron onPress={() => s.set({ storeId: r.store_id, partnerId: r.partner_id, role: r.role as any, storeName: r.display_name, tradingName: r.trading_name, market: r.market as any, timezone: r.timezone })} />)}</Screen></View>; }
   return <Tabs tabBar={(p) => <Bar {...p} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.canvas } }}><Tabs.Screen name="index" /><Tabs.Screen name="orders" /><Tabs.Screen name="listings" /><Tabs.Screen name="more" /></Tabs>;
 }

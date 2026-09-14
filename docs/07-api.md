@@ -37,6 +37,13 @@ Three call styles. Prefer the leftmost that works.
 | `BG117` | Publishing blocked — document expired | 409 |
 | `BG118` | Store paused | 409 |
 | `BG120` | Already redeemed → **returns 200 with the original record**, never an error surfaced to staff |
+| `BG122` | Partner code required / not live (used, expired, withdrawn) | 409 |
+| `BG123` | Partner code issued for another market | 409 |
+| `BG124` | Partner request or code not found | 404 |
+| `BG125` | A code was already issued for this request | 409 |
+| `BG126` | Code already redeemed — revoke refused, suspend the partner instead | 409 |
+| `BG127` | Request was declined | 409 |
+| `BG128` | Code no longer live — resend refused | 409 |
 | `BG130` | Four-eyes required | 428 |
 | `BG131` | Re-auth required for money operation | 428 |
 | `BG140` | Payment status unresolved — retry unavailable | 409 |
@@ -130,7 +137,12 @@ Contract: a new reservation is visible within **2 s p95**.
 
 | Function | Role | Notes |
 |---|---|---|
-| `app.submit_application(payload)` | — | Public |
+| `app.check_partner_code(code)` | anon | `{status: ok|invalid|expired|redeemed|revoked, market, legal_name, trading_name}` — the "Enter your partner code" screen; rate-limit at the edge |
+| `app.submit_application(code, payload)` | signed in | **Requires a live partner code** (`BG122`, `BG123`); redeems it, creates the partner in `applied`, makes the caller owner. The code-less signature no longer exists |
+| `app.my_partners()` | signed in | Partners the caller belongs to partner-wide, with `store_count` — non-empty for an applicant mid-onboarding while `my_stores_detail()` is still empty |
+| `app.ops_partner_requests(status?, market?)` · `ops_partner_codes(market?)` | ops | The request queue and the codes, market-scoped |
+| `app.ops_issue_partner_code(request, days=14, reason?)` | ops_manager, admin | Single-use `BG-XXXX-XXXX`; **the database emails it** (trigger → `partner-code-email`), `emailed_at` / `email_error` on the row |
+| `app.ops_decline_partner_request(request, reason_code, text?)` · `ops_revoke_partner_code(code, reason)` · `ops_resend_partner_code(code)` | ops_manager, admin | Audited; revoking returns the request to `contacted` |
 | `app.upload_document(...)` | owner | Storage path + metadata |
 | `app.accept_contract(contract_id, ip, ua)` | owner | Records timestamp, IP, device, document hash |
 | `app.upsert_store(...)` | owner, manager | Pin authoritative; pickup point required in both languages |

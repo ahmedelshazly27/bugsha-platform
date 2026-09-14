@@ -91,7 +91,10 @@ Universal states, required on every consumer screen: `default · loading · skel
 
 | Frame | Screen | Reads | Mutations | Contract |
 |---|---|---|---|---|
-| `S-P-001`–`002` | Landing, application | — | `app.submit_application` | Calculator input → estimated monthly recovery |
+| `S-P-000` | Join Bugsha as a partner (`/join`) | — | — | Two paths: *I have a partner code* / *Request a partner code*. Reachable signed-out. Staff of an existing partner are invited by their owner instead |
+| `S-P-001` | Enter your partner code (`/join/code`, deep link `bugsha-partner://signup?code=`) | `app.check_partner_code` | — | Invalid / expired / used / withdrawn each get their own copy and next step; a live code pre-fills the application |
+| `S-P-002` | Application (`/join/apply`) | `app.cities_for` | `app.submit_application(code, …)` | Pre-filled legal + trading name from the code; the code is consumed on submit; lands on the setup checklist |
+| `S-P-004` | Request a partner code (`/join/request`) | `app.cities_for` | Edge `partner-request` | Same form as bugsha.app/partners; ops issues the code from the console and the database emails it |
 | `S-P-003` | KYB documents | `market_document_requirement`, `partner_document` | `app.upload_document` | Market-configured set. Capture, preview, retake, validation, per-document status |
 | `S-P-004` | Contract | `partner_contract` | `app.accept_contract` | Records timestamp, IP, device, user, document hash |
 | `S-P-005` | Store setup | — | `app.upsert_store`, `app.set_hours` | Pin authoritative; pickup point required in **both** languages with worked examples; split shifts; separate Ramadan schedule |
